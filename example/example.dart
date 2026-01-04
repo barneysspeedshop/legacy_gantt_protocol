@@ -37,7 +37,10 @@ void main() {
   final renameOpA = Operation(
     type: 'UPDATE_TASK',
     data: {'id': taskId, 'name': 'Project Plan (Updated by A)'},
-    timestamp: Hlc.fromDate(DateTime.now().add(const Duration(seconds: 1)), 'client_a'),
+    timestamp: Hlc.fromDate(
+      DateTime.now().add(const Duration(seconds: 1)),
+      'client_a',
+    ),
     actorId: 'client_a',
   );
   print('Client A: Renames to "${renameOpA.data['name']}"');
@@ -47,7 +50,10 @@ void main() {
   final completeOpB = Operation(
     type: 'UPDATE_TASK',
     data: {'id': taskId, 'completion': 1.0},
-    timestamp: Hlc.fromDate(DateTime.now().add(const Duration(seconds: 2)), 'client_b'),
+    timestamp: Hlc.fromDate(
+      DateTime.now().add(const Duration(seconds: 2)),
+      'client_b',
+    ),
     actorId: 'client_b',
   );
   print('Client B: Marks completion as 100%');
@@ -70,7 +76,9 @@ void main() {
   print('Client B: ${taskB.name}, Complete: ${taskB.completion}');
 
   if (taskA.contentHash == taskB.contentHash) {
-    print('\nSUCCESS: Replicas have converged! Hash: ${taskA.contentHash.substring(0, 8)}...');
+    print(
+      '\nSUCCESS: Replicas have converged! Hash: ${taskA.contentHash.substring(0, 8)}...',
+    );
   } else {
     print('\nFAILURE: Replicas diverged!');
   }

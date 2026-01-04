@@ -15,5 +15,6 @@ class SyncProgress {
   double get percentage => total == 0 ? 0 : processed / total;
 
   @override
-  String toString() => 'SyncProgress(processed: $processed, total: $total, status: $status)';
+  String toString() =>
+      'SyncProgress(processed: $processed, total: $total, status: $status)';
 }

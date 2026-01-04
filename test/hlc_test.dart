@@ -4,7 +4,15 @@ import 'package:test/test.dart';
 void main() {
   group('Hlc', () {
     test('Default format matches requirement', () {
-      final ts = DateTime.utc(2023, 10, 27, 10, 0, 0, 123).millisecondsSinceEpoch;
+      final ts = DateTime.utc(
+        2023,
+        10,
+        27,
+        10,
+        0,
+        0,
+        123,
+      ).millisecondsSinceEpoch;
       final hlc = Hlc(millis: ts, counter: 0, nodeId: 'device123');
 
       // Expected: "2023-10-27T10:00:00.123Z-0000-device123"
@@ -20,7 +28,10 @@ void main() {
 
     test('parses correctly', () {
       final hlc = Hlc.parse('2023-10-27T10:00:00.123Z-000A-nodeId');
-      expect(hlc.millis, DateTime.utc(2023, 10, 27, 10, 0, 0, 123).millisecondsSinceEpoch);
+      expect(
+        hlc.millis,
+        DateTime.utc(2023, 10, 27, 10, 0, 0, 123).millisecondsSinceEpoch,
+      );
       expect(hlc.counter, 10);
       expect(hlc.nodeId, 'nodeId');
     });

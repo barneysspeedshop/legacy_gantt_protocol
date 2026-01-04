@@ -10,16 +10,22 @@ void main() {
       expect(hlc.millis, equals(localDate.toUtc().millisecondsSinceEpoch));
     });
 
-    test('Hlc.parse should handle timestamps with and without Z suffix correctly as UTC', () {
-      const isoWithZ = '2025-12-26T20:00:00.000Z';
-      const isoWithoutZ = '2025-12-26T20:00:00.000';
+    test(
+      'Hlc.parse should handle timestamps with and without Z suffix correctly as UTC',
+      () {
+        const isoWithZ = '2025-12-26T20:00:00.000Z';
+        const isoWithoutZ = '2025-12-26T20:00:00.000';
 
-      final hlc1 = Hlc.parse('$isoWithZ-0000-node1');
-      final hlc2 = Hlc.parse('$isoWithoutZ-0000-node1');
+        final hlc1 = Hlc.parse('$isoWithZ-0000-node1');
+        final hlc2 = Hlc.parse('$isoWithoutZ-0000-node1');
 
-      expect(hlc1.millis, equals(hlc2.millis));
-      expect(DateTime.fromMillisecondsSinceEpoch(hlc1.millis, isUtc: true).year, equals(2025));
-    });
+        expect(hlc1.millis, equals(hlc2.millis));
+        expect(
+          DateTime.fromMillisecondsSinceEpoch(hlc1.millis, isUtc: true).year,
+          equals(2025),
+        );
+      },
+    );
 
     test('Hlc.parse should handle legacy int timestamps', () {
       const millis = 1735243200000;

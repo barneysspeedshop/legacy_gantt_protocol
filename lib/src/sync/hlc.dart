@@ -9,16 +9,25 @@ class Hlc implements Comparable<Hlc> {
   final int counter;
   final String nodeId;
 
-  const Hlc({required this.millis, required this.counter, required this.nodeId});
+  const Hlc({
+    required this.millis,
+    required this.counter,
+    required this.nodeId,
+  });
 
   /// Creates a generic HLC for initialization (e.g. time 0).
   static const zero = Hlc(millis: 0, counter: 0, nodeId: 'node');
 
   /// Creates an HLC from a DateTime and nodeId.
-  factory Hlc.fromDate(DateTime dateTime, String nodeId) => Hlc(millis: dateTime.toUtc().millisecondsSinceEpoch, counter: 0, nodeId: nodeId);
+  factory Hlc.fromDate(DateTime dateTime, String nodeId) => Hlc(
+    millis: dateTime.toUtc().millisecondsSinceEpoch,
+    counter: 0,
+    nodeId: nodeId,
+  );
 
   /// Creates an HLC from a legacy int timestamp.
-  factory Hlc.fromIntTimestamp(int timestamp) => Hlc(millis: timestamp, counter: 0, nodeId: 'legacy');
+  factory Hlc.fromIntTimestamp(int timestamp) =>
+      Hlc(millis: timestamp, counter: 0, nodeId: 'legacy');
 
   /// Parses an HLC string in the format:
   /// `2023-10-27T10:00:00.123Z-0000-nodeId`
@@ -39,9 +48,15 @@ class Hlc implements Comparable<Hlc> {
       final nodeId = match.group(3)!;
 
       // Ensure UTC parsing by appending Z if missing
-      final normalizedIso = isoTimestamp.endsWith('Z') ? isoTimestamp : '${isoTimestamp}Z';
+      final normalizedIso = isoTimestamp.endsWith('Z')
+          ? isoTimestamp
+          : '${isoTimestamp}Z';
       final dateTime = DateTime.parse(normalizedIso);
-      return Hlc(millis: dateTime.millisecondsSinceEpoch, counter: int.parse(counterString, radix: 16), nodeId: nodeId);
+      return Hlc(
+        millis: dateTime.millisecondsSinceEpoch,
+        counter: int.parse(counterString, radix: 16),
+        nodeId: nodeId,
+      );
     }
 
     // Try format without NodeId: ISO-Counter(hex)
@@ -52,9 +67,15 @@ class Hlc implements Comparable<Hlc> {
       final isoTimestamp = match.group(1)!;
       final counterString = match.group(2)!;
       try {
-        final normalizedIso = isoTimestamp.endsWith('Z') ? isoTimestamp : '${isoTimestamp}Z';
+        final normalizedIso = isoTimestamp.endsWith('Z')
+            ? isoTimestamp
+            : '${isoTimestamp}Z';
         final dateTime = DateTime.parse(normalizedIso);
-        return Hlc(millis: dateTime.millisecondsSinceEpoch, counter: int.parse(counterString, radix: 16), nodeId: 'unknown');
+        return Hlc(
+          millis: dateTime.millisecondsSinceEpoch,
+          counter: int.parse(counterString, radix: 16),
+          nodeId: 'unknown',
+        );
       } catch (_) {
         // Validation for date parse failure
       }
@@ -64,7 +85,11 @@ class Hlc implements Comparable<Hlc> {
     try {
       final normalizedIso = hlc.endsWith('Z') ? hlc : '${hlc}Z';
       final dateTime = DateTime.parse(normalizedIso);
-      return Hlc(millis: dateTime.millisecondsSinceEpoch, counter: 0, nodeId: 'unknown');
+      return Hlc(
+        millis: dateTime.millisecondsSinceEpoch,
+        counter: 0,
+        nodeId: 'unknown',
+      );
     } catch (_) {
       // Ignore
     }
@@ -123,7 +148,11 @@ class Hlc implements Comparable<Hlc> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Hlc && runtimeType == other.runtimeType && millis == other.millis && counter == other.counter && nodeId == other.nodeId;
+      other is Hlc &&
+          runtimeType == other.runtimeType &&
+          millis == other.millis &&
+          counter == other.counter &&
+          nodeId == other.nodeId;
 
   @override
   int get hashCode => millis.hashCode ^ counter.hashCode ^ nodeId.hashCode;

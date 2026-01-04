@@ -72,7 +72,15 @@ class ProtocolTag {
     'metadata': metadata,
   };
 
-  ProtocolTag copyWith({String? id, String? name, String? merkleRoot, Hlc? timestamp, String? actorId, bool? isDeleted, Map<String, dynamic>? metadata}) {
+  ProtocolTag copyWith({
+    String? id,
+    String? name,
+    String? merkleRoot,
+    Hlc? timestamp,
+    String? actorId,
+    bool? isDeleted,
+    Map<String, dynamic>? metadata,
+  }) {
     return ProtocolTag(
       id: id ?? this.id,
       name: name ?? this.name,

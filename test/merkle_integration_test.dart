@@ -11,7 +11,10 @@ class MockWebSocketClient implements GanttSyncClient {
   Future<String> getMerkleRoot() async => remoteRootToReturn ?? '';
 
   @override
-  Future<void> syncWithMerkle({required String remoteRoot, required int depth}) async {
+  Future<void> syncWithMerkle({
+    required String remoteRoot,
+    required int depth,
+  }) async {
     syncCalled = true;
   }
 
@@ -35,7 +38,14 @@ class MockWebSocketClient implements GanttSyncClient {
 void main() {
   group('Merkle Integration', () {
     test('Calculates local root and detects mismatch', () async {
-      final task1 = ProtocolTask(id: 't1', rowId: 'r1', start: DateTime(2023, 1, 1), end: DateTime(2023, 1, 2), name: 'Task 1', lastUpdated: Hlc.zero);
+      final task1 = ProtocolTask(
+        id: 't1',
+        rowId: 'r1',
+        start: DateTime(2023, 1, 1),
+        end: DateTime(2023, 1, 2),
+        name: 'Task 1',
+        lastUpdated: Hlc.zero,
+      );
 
       // 1. Calculate Expected Root
       final localHash = task1.contentHash;
@@ -47,20 +57,32 @@ void main() {
 
       // 3. Perform Check Logic
       final tasks = [task1];
-      final currentLocalRoot = MerkleTree.computeRoot(tasks.map((t) => t.contentHash).toList());
+      final currentLocalRoot = MerkleTree.computeRoot(
+        tasks.map((t) => t.contentHash).toList(),
+      );
 
       expect(currentLocalRoot, expectedRoot);
       expect(currentLocalRoot, isNot(await client.getMerkleRoot()));
 
       if (currentLocalRoot != await client.getMerkleRoot()) {
-        await client.syncWithMerkle(remoteRoot: await client.getMerkleRoot(), depth: 0);
+        await client.syncWithMerkle(
+          remoteRoot: await client.getMerkleRoot(),
+          depth: 0,
+        );
       }
 
       expect(client.syncCalled, isTrue);
     });
 
     test('Calculates local root and verifies match', () async {
-      final task1 = ProtocolTask(id: 't1', rowId: 'r1', start: DateTime(2023, 1, 1), end: DateTime(2023, 1, 2), name: 'Task 1', lastUpdated: Hlc.zero);
+      final task1 = ProtocolTask(
+        id: 't1',
+        rowId: 'r1',
+        start: DateTime(2023, 1, 1),
+        end: DateTime(2023, 1, 2),
+        name: 'Task 1',
+        lastUpdated: Hlc.zero,
+      );
 
       final localHash = task1.contentHash;
       final expectedRoot = MerkleTree.computeRoot([localHash]);
@@ -69,12 +91,17 @@ void main() {
       client.remoteRootToReturn = expectedRoot; // MATCHING
 
       final tasks = [task1];
-      final currentLocalRoot = MerkleTree.computeRoot(tasks.map((t) => t.contentHash).toList());
+      final currentLocalRoot = MerkleTree.computeRoot(
+        tasks.map((t) => t.contentHash).toList(),
+      );
 
       expect(currentLocalRoot, await client.getMerkleRoot());
 
       if (currentLocalRoot != await client.getMerkleRoot()) {
-        await client.syncWithMerkle(remoteRoot: await client.getMerkleRoot(), depth: 0);
+        await client.syncWithMerkle(
+          remoteRoot: await client.getMerkleRoot(),
+          depth: 0,
+        );
       }
 
       expect(client.syncCalled, isFalse);

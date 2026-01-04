@@ -35,7 +35,8 @@ class MockGanttSyncClient implements GanttSyncClient {
   Stream<int> get outboundPendingCount => Stream.value(0);
 
   @override
-  Stream<SyncProgress> get inboundProgress => Stream.value(const SyncProgress(processed: 0, total: 0));
+  Stream<SyncProgress> get inboundProgress =>
+      Stream.value(const SyncProgress(processed: 0, total: 0));
 
   // Helper to simulate receiving an operation from a remote source.
   void receiveOperation(Operation op) {
@@ -46,13 +47,21 @@ class MockGanttSyncClient implements GanttSyncClient {
   Future<String> getMerkleRoot() async => '';
 
   @override
-  Future<void> syncWithMerkle({required String remoteRoot, required int depth}) async {}
+  Future<void> syncWithMerkle({
+    required String remoteRoot,
+    required int depth,
+  }) async {}
 }
 
 void main() {
   group('Operation', () {
     test('should initialize correctly with constructor', () {
-      final operation = Operation(type: 'update', data: {'key': 'value'}, timestamp: Hlc.fromIntTimestamp(1234567890), actorId: 'user1');
+      final operation = Operation(
+        type: 'update',
+        data: {'key': 'value'},
+        timestamp: Hlc.fromIntTimestamp(1234567890),
+        actorId: 'user1',
+      );
 
       expect(operation.type, 'update');
       expect(operation.data, {'key': 'value'});
@@ -61,7 +70,12 @@ void main() {
     });
 
     test('should serialize to JSON correctly via toJson', () {
-      final operation = Operation(type: 'insert', data: {'id': 1, 'name': 'task'}, timestamp: Hlc.fromIntTimestamp(1000), actorId: 'abc');
+      final operation = Operation(
+        type: 'insert',
+        data: {'id': 1, 'name': 'task'},
+        timestamp: Hlc.fromIntTimestamp(1000),
+        actorId: 'abc',
+      );
 
       final json = operation.toJson();
 

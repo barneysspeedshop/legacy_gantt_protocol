@@ -12,7 +12,14 @@ void main() {
     });
 
     test('should merge new task update', () {
-      final task = ProtocolTask(id: '1', rowId: 'row1', start: DateTime(2023, 1, 1), end: DateTime(2023, 1, 5), name: 'Task 1', lastUpdated: Hlc.zero);
+      final task = ProtocolTask(
+        id: '1',
+        rowId: 'row1',
+        start: DateTime(2023, 1, 1),
+        end: DateTime(2023, 1, 5),
+        name: 'Task 1',
+        lastUpdated: Hlc.zero,
+      );
 
       final op = Operation(
         type: 'UPDATE_TASK',
@@ -72,7 +79,13 @@ void main() {
     test('should handle new task creation via update', () {
       final op = Operation(
         type: 'UPDATE_TASK',
-        data: {'id': '2', 'rowId': 'row1', 'start': DateTime(2023, 1, 1).toIso8601String(), 'end': DateTime(2023, 1, 5).toIso8601String(), 'name': 'Task 2'},
+        data: {
+          'id': '2',
+          'rowId': 'row1',
+          'start': DateTime(2023, 1, 1).toIso8601String(),
+          'end': DateTime(2023, 1, 5).toIso8601String(),
+          'name': 'Task 2',
+        },
         timestamp: Hlc.fromIntTimestamp(100),
         actorId: 'user1',
       );

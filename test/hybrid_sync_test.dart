@@ -29,10 +29,20 @@ void main() {
       );
 
       // Op A: Updates Name
-      final opA = Operation(type: 'UPDATE_TASK', data: {'id': '1', 'name': 'Name by A'}, timestamp: hlcA, actorId: 'A');
+      final opA = Operation(
+        type: 'UPDATE_TASK',
+        data: {'id': '1', 'name': 'Name by A'},
+        timestamp: hlcA,
+        actorId: 'A',
+      );
 
       // Op B: Updates Notes
-      final opB = Operation(type: 'UPDATE_TASK', data: {'id': '1', 'notes': 'Notes by B'}, timestamp: hlcB, actorId: 'B');
+      final opB = Operation(
+        type: 'UPDATE_TASK',
+        data: {'id': '1', 'notes': 'Notes by B'},
+        timestamp: hlcB,
+        actorId: 'B',
+      );
 
       // Apply A then B
       var result = engine.mergeTasks([baseTask], [opA]);
@@ -53,13 +63,30 @@ void main() {
       const hlc1 = Hlc(millis: 1000, counter: 0, nodeId: 'A');
       const hlc2 = Hlc(millis: 2000, counter: 0, nodeId: 'B');
 
-      final baseTask = ProtocolTask(id: '1', rowId: 'r1', start: DateTime.now(), end: DateTime.now(), name: 'Old', lastUpdated: Hlc.zero);
+      final baseTask = ProtocolTask(
+        id: '1',
+        rowId: 'r1',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        name: 'Old',
+        lastUpdated: Hlc.zero,
+      );
 
       // Op 1 (Newer): Set Name to New
-      final op1 = Operation(type: 'UPDATE', data: {'id': '1', 'name': 'New'}, timestamp: hlc2, actorId: 'B');
+      final op1 = Operation(
+        type: 'UPDATE',
+        data: {'id': '1', 'name': 'New'},
+        timestamp: hlc2,
+        actorId: 'B',
+      );
 
       // Op 2 (Older): Set Name to Old2 (arrives late)
-      final op2 = Operation(type: 'UPDATE', data: {'id': '1', 'name': 'Old2'}, timestamp: hlc1, actorId: 'A');
+      final op2 = Operation(
+        type: 'UPDATE',
+        data: {'id': '1', 'name': 'Old2'},
+        timestamp: hlc1,
+        actorId: 'A',
+      );
 
       var result = engine.mergeTasks([baseTask], [op1, op2]);
       expect(result.first.name, 'New'); // Newer wins
@@ -69,24 +96,47 @@ void main() {
       const hlcDelete = Hlc(millis: 1000, counter: 0, nodeId: 'A');
       const hlcUpdate = Hlc(millis: 2000, counter: 0, nodeId: 'B');
 
-      final baseTask = ProtocolTask(id: '1', rowId: 'r1', start: DateTime.now(), end: DateTime.now(), name: 'Alive', lastUpdated: Hlc.zero);
+      final baseTask = ProtocolTask(
+        id: '1',
+        rowId: 'r1',
+        start: DateTime.now(),
+        end: DateTime.now(),
+        name: 'Alive',
+        lastUpdated: Hlc.zero,
+      );
 
       // Op 1: Delete
-      final opDelete = Operation(type: 'DELETE_TASK', data: {'id': '1'}, timestamp: hlcDelete, actorId: 'A');
+      final opDelete = Operation(
+        type: 'DELETE_TASK',
+        data: {'id': '1'},
+        timestamp: hlcDelete,
+        actorId: 'A',
+      );
 
       // Op 2: Update (Resurrect)
-      final opUpdate = Operation(type: 'UPDATE_TASK', data: {'id': '1', 'name': 'Resurrected'}, timestamp: hlcUpdate, actorId: 'B');
+      final opUpdate = Operation(
+        type: 'UPDATE_TASK',
+        data: {'id': '1', 'name': 'Resurrected'},
+        timestamp: hlcUpdate,
+        actorId: 'B',
+      );
 
       // Apply Delete
       var result = engine.mergeTasks([baseTask], [opDelete]);
-      expect(result, isEmpty); // Hidden from UI (logic might return tombstone or filter it? Engine usually returns all, including deleted if not filtered)
+      expect(
+        result,
+        isEmpty,
+      ); // Hidden from UI (logic might return tombstone or filter it? Engine usually returns all, including deleted if not filtered)
       // Wait, mergeTasks filters deleted?
       // CRDTEngine description: "Returns the filtered list of visible tasks." (Usually)
       // Let's assume it DOES filter. If so, result is empty.
 
       // Apply Update (Resurrect) - Need to pass tombstone.
       // Recreate tombstone
-      final tombstone = baseTask.copyWith(isDeleted: true, fieldTimestamps: {'isDeleted': hlcDelete});
+      final tombstone = baseTask.copyWith(
+        isDeleted: true,
+        fieldTimestamps: {'isDeleted': hlcDelete},
+      );
       result = engine.mergeTasks([tombstone], [opUpdate]);
 
       expect(result, hasLength(1));

@@ -21,7 +21,10 @@ void main() {
 
     test('toString returns correct format', () {
       const progress = SyncProgress(processed: 5, total: 10);
-      expect(progress.toString(), 'SyncProgress(processed: 5, total: 10, status: )');
+      expect(
+        progress.toString(),
+        'SyncProgress(processed: 5, total: 10, status: )',
+      );
     });
   });
 }

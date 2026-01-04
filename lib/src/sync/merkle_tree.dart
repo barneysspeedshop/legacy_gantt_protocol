@@ -6,12 +6,19 @@ import 'hlc.dart';
 /// Represents a node in the Merkle Tree.
 class MerkleNode {
   final String hash;
-  final Hlc? rangeStart; // Null for leaf nodes if we treat them specifically, but for time-based, it's the range
+  final Hlc?
+  rangeStart; // Null for leaf nodes if we treat them specifically, but for time-based, it's the range
   final Hlc? rangeEnd;
   final List<MerkleNode> children;
   final int count; // Number of items in this subtree
 
-  MerkleNode({required this.hash, this.rangeStart, this.rangeEnd, this.children = const [], this.count = 0});
+  MerkleNode({
+    required this.hash,
+    this.rangeStart,
+    this.rangeEnd,
+    this.children = const [],
+    this.count = 0,
+  });
 
   Map<String, dynamic> toJson() => {
     'hash': hash,
@@ -44,5 +51,6 @@ class MerkleTree {
     return hash(hashes.join(','));
   }
 
-  static String computeRoot(List<String> validContentHashes) => combineHashes(validContentHashes);
+  static String computeRoot(List<String> validContentHashes) =>
+      combineHashes(validContentHashes);
 }

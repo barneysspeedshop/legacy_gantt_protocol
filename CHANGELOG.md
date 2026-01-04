@@ -1,3 +1,7 @@
+## 1.0.1
+
+- **CHORE**: Format code using `dart format`.
+
 ## 1.0.0
 
 - **Initial Stable Release** of the Gantt-Sync Protocol.
