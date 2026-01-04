@@ -1,6 +1,6 @@
 name: legacy_gantt_protocol
 description: A pure-Dart protocol synchronization library for Gantt Charts.
-version: 0.0.1
+version: 1.0.0
 environment:
   sdk: ^3.10.4
 
