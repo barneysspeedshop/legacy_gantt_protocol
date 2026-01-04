@@ -1,0 +1,6 @@
+reference_server_go/
+build/
+coverage/
+.dart_tool/
+.idea/
+*.iml
