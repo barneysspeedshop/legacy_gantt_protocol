@@ -217,3 +217,52 @@ The content hash of a Task/Resource/Dependency is the **SHA-256** hash of its de
 2.  Sort hashes alphabetically.
 3.  Combine them into a Merkle Tree structure (implementation specific, but standard binary tree).
 4.  The root hash is the "Version State".
+
+---
+
+## 5. Transport Protocol (WebSocket)
+
+While the data format is transport-agnostic, the standard real-time implementation uses WebSockets.
+
+### 5.1 Connection Handshake
+
+1.  **Connect**: Client connects to the WebSocket endpoint (e.g., `ws://server/`).
+2.  **Subscribe**: Client sends a subscription message to join a specific channel (tenant/project).
+
+```json
+{
+  "type": "subscribe",
+  "channel": "tenant-123"
+}
+```
+
+3.  **Confirmation**: Server responds with `SUBSCRIBE_SUCCESS`.
+    *   **CRITICAL**: This response MUST NOT include `timestamp` or `actorId` fields. The presence of these fields causes clients to interpret the message as a CRDT operation rather than a control message.
+
+```json
+{
+  "type": "SUBSCRIBE_SUCCESS",
+  "channel": "tenant-123"
+}
+```
+
+### 5.2 Control Messages
+
+*   **GET_MERKLE_ROOT**: Client requests the current server-side Merkle Root.
+
+```json
+{ "type": "GET_MERKLE_ROOT" }
+```
+
+*   **MERKLE_ROOT**: Server response containing the root hash.
+
+```json
+{
+  "type": "MERKLE_ROOT",
+  "data": {
+    "root": "hash-abc-123"
+  },
+  "timestamp": "...", 
+  "actorId": "server"
+}
+```
