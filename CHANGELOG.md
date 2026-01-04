@@ -1,3 +1,7 @@
+## 1.0.2
+
+* **CHORE**: Fix lint.
+
 ## 1.0.1
 
 - **CHORE**: Format code using `dart format`.
