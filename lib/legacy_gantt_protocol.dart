@@ -4,6 +4,7 @@ export 'src/models/operation.dart';
 export 'src/models/protocol_task.dart';
 export 'src/models/protocol_dependency.dart';
 export 'src/models/protocol_resource.dart';
+export 'src/models/protocol_tag.dart';
 
 export 'src/sync/hlc.dart';
 export 'src/sync/crdt_engine.dart';

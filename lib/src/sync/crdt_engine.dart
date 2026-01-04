@@ -2,6 +2,7 @@ import '../models/operation.dart';
 import '../models/protocol_task.dart';
 import '../models/protocol_dependency.dart';
 import '../models/protocol_resource.dart';
+import '../models/protocol_tag.dart';
 import 'merkle_tree.dart';
 import 'hlc.dart';
 
@@ -322,5 +323,81 @@ class CRDTEngine {
     final allHashes = [...taskHashes, ...depHashes, ...resourceHashes];
 
     return MerkleTree.computeRoot(allHashes.toList());
+  }
+
+  /// Creates a new immutable Snapshot Tag for the current state.
+  ProtocolTag createTag({
+    required String name,
+    required String id,
+    required Hlc timestamp,
+    required List<ProtocolTask> tasks,
+    List<ProtocolDependency> dependencies = const [],
+    List<ProtocolResource> resources = const [],
+    String? actorId,
+    Map<String, dynamic> metadata = const {},
+  }) {
+    final root = computeMerkleRoot(tasks, dependencies: dependencies, resources: resources);
+    return ProtocolTag(id: id, name: name, merkleRoot: root, timestamp: timestamp, actorId: actorId, metadata: metadata);
+  }
+
+  /// Merges a list of tags with a list of operations (CREATE_TAG, DELETE_TAG).
+  List<ProtocolTag> mergeTags(List<ProtocolTag> currentTags, List<Operation> operations) {
+    final tagMap = {for (var t in currentTags) t.id: t};
+
+    for (var op in operations) {
+      if (op.type == 'BATCH_UPDATE') {
+        final subOpsList = op.data['operations'] as List? ?? [];
+        for (final subOpMaps in subOpsList) {
+          try {
+            final opMap = subOpMaps as Map<String, dynamic>;
+            final subOp = Operation.fromJson(opMap);
+            _applyTagOp(tagMap, subOp);
+          } catch (e) {
+            print('CRDTEngine Error processing batch op (tag): $e');
+          }
+        }
+      } else {
+        _applyTagOp(tagMap, op);
+      }
+    }
+
+    return tagMap.values.where((t) => !t.isDeleted).toList();
+  }
+
+  void _applyTagOp(Map<String, ProtocolTag> tagMap, Operation op) {
+    if (op.type == 'DELETE_TAG') {
+      final tagId = op.data['id'] as String?;
+      if (tagId == null) return;
+
+      final existing = tagMap[tagId];
+      if (existing != null) {
+        // Tag deletion is simple LWW on isDeleted or purely add-wins if we treat tags as immutable once created.
+        // Assuming we allow deleting tags.
+        // Ifop timestamp > existing timestamp? Or just apply delete?
+        // Tags are usually immutable states, but the *list* of tags is mutable.
+        tagMap[tagId] = existing.copyWith(isDeleted: true);
+      }
+      return;
+    }
+
+    if (op.type != 'CREATE_TAG') return;
+
+    final opData = op.data;
+    final String? tagId = opData['id'] as String?;
+    if (tagId == null) return;
+
+    final existing = tagMap[tagId];
+    if (existing != null) {
+      // Tags are immutable. If it exists, we technically shouldn't update it unless we support renaming.
+      // But let's assume CREATE_TAG is idempotent.
+      // If deleted, resurrect?
+      if (existing.isDeleted) {
+        tagMap[tagId] = existing.copyWith(isDeleted: false);
+      }
+      return;
+    }
+
+    final newTag = ProtocolTag.fromJson(opData);
+    tagMap[tagId] = newTag;
   }
 }

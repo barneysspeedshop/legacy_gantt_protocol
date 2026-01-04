@@ -4,13 +4,14 @@ import '../sync/hlc.dart';
 /// Represents a single operation in the CRDT system.
 class Operation {
   final String type;
+  final int schemaVersion;
   final Map<String, dynamic> data;
   final Hlc timestamp;
   final String actorId;
 
-  Operation({required this.type, required this.data, required this.timestamp, required this.actorId});
+  Operation({required this.type, this.schemaVersion = 1, required this.data, required this.timestamp, required this.actorId});
 
-  Map<String, dynamic> toJson() => {'type': type, 'data': data, 'timestamp': timestamp.toString(), 'actorId': actorId};
+  Map<String, dynamic> toJson() => {'type': type, 'schemaVersion': schemaVersion, 'data': data, 'timestamp': timestamp.toString(), 'actorId': actorId};
 
   factory Operation.fromJson(Map<String, dynamic> json) {
     Hlc parsedTimestamp;
@@ -23,7 +24,13 @@ class Operation {
       parsedTimestamp = Hlc.zero;
     }
 
-    return Operation(type: json['type'] as String, data: json['data'] as Map<String, dynamic>, timestamp: parsedTimestamp, actorId: json['actorId'] as String);
+    return Operation(
+      type: json['type'] as String,
+      schemaVersion: json['schemaVersion'] as int? ?? 1,
+      data: json['data'] as Map<String, dynamic>,
+      timestamp: parsedTimestamp,
+      actorId: json['actorId'] as String,
+    );
   }
 
   @override
