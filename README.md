@@ -127,7 +127,7 @@ transport.send(op.toJson());
 
 ---
 
-## Moat & Ecosystem
+## Ecosystem
 
 By adopting the **Gantt-Sync Standard**, you are not just using a library; you are adopting a data architecture that guarantees:
 1.  **Offline Resilience**: Work continues when the internet breaks.
