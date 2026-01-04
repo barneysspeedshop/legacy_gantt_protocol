@@ -1,3 +1,7 @@
+## 1.0.5
+
+* **FIX**: Fix SDK version compatibility.
+
 ## 1.0.4
 
 * **DOCS**: Added 100% dartdoc coverage to public APIs.

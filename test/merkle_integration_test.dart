@@ -33,6 +33,9 @@ class MockWebSocketClient implements GanttSyncClient {
   Future<void> sendOperation(Operation operation) async {}
   @override
   Future<void> sendOperations(List<Operation> operations) async {}
+
+  @override
+  String get actorId => 'mock-actor';
 }
 
 void main() {

@@ -51,6 +51,9 @@ class MockGanttSyncClient implements GanttSyncClient {
     required String remoteRoot,
     required int depth,
   }) async {}
+
+  @override
+  String get actorId => 'mock-actor';
 }
 
 void main() {

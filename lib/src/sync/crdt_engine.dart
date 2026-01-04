@@ -6,17 +6,16 @@ import '../models/protocol_tag.dart';
 import 'merkle_tree.dart';
 import 'hlc.dart';
 
+/// The core engine for Conflict-Free Replicated Data Types (CRDT) logic.
+///
+/// Handles merging of tasks, resources, and tags based on Last-Write-Wins (LWW)
+/// and hybrid logical clocks.
 class CRDTEngine {
-  /// Merges a list of tasks with a list of operations.
-  /// Uses Last-Write-Wins (LWW) based on timestamps.
   /// Merges a list of tasks with a list of operations.
   /// Uses "Hybrid Sovereignty" logic:
   /// - Field-Level LWW (Map-CRDT) for properties.
   /// - Add-Wins OR-Set (Tombstones) for existence.
-  List<ProtocolTask> mergeTasks(
-    List<ProtocolTask> currentTasks,
-    List<Operation> operations,
-  ) {
+  List<ProtocolTask> mergeTasks(List<ProtocolTask> currentTasks, List<Operation> operations) {
     // 1. Initialize map with existing tasks
     final taskMap = {for (var t in currentTasks) t.id: t};
 
@@ -43,10 +42,7 @@ class CRDTEngine {
   }
 
   /// Merges a list of resources with a list of operations.
-  List<ProtocolResource> mergeResources(
-    List<ProtocolResource> currentResources,
-    List<Operation> operations,
-  ) {
+  List<ProtocolResource> mergeResources(List<ProtocolResource> currentResources, List<Operation> operations) {
     // 1. Initialize map with existing resources
     final resourceMap = {for (var r in currentResources) r.id: r};
 
@@ -72,13 +68,9 @@ class CRDTEngine {
     return resourceMap.values.where((r) => !r.isDeleted).toList();
   }
 
-  void _applyResourceOp(
-    Map<String, ProtocolResource> resourceMap,
-    Operation op,
-  ) {
+  void _applyResourceOp(Map<String, ProtocolResource> resourceMap, Operation op) {
     if (op.type == 'DELETE_RESOURCE') {
-      final resourceId =
-          op.data['id'] as String? ?? op.data['resourceId'] as String?;
+      final resourceId = op.data['id'] as String? ?? op.data['resourceId'] as String?;
       if (resourceId == null) return;
 
       final existing = resourceMap[resourceId];
@@ -112,11 +104,7 @@ class CRDTEngine {
     resourceMap[resourceId] = _mergeResource(base, op, effectiveData);
   }
 
-  ProtocolResource _mergeResource(
-    ProtocolResource target,
-    Operation op,
-    Map<String, dynamic> changes,
-  ) {
+  ProtocolResource _mergeResource(ProtocolResource target, Operation op, Map<String, dynamic> changes) {
     String newName = target.name;
     if (changes.containsKey('name')) newName = changes['name'];
 
@@ -131,26 +119,13 @@ class CRDTEngine {
     // Metadata merging
     final Map<String, dynamic> newMetadata = Map.from(target.metadata);
     changes.forEach((key, value) {
-      if (![
-        'id',
-        'name',
-        'parentId',
-        'ganttType',
-        'isDeleted',
-        'data',
-      ].contains(key)) {
+      if (!['id', 'name', 'parentId', 'ganttType', 'isDeleted', 'data'].contains(key)) {
         newMetadata[key] = value;
       }
     });
 
     // Implicit resurrection
-    return target.copyWith(
-      name: newName,
-      parentId: newParentId,
-      type: newType,
-      isDeleted: false,
-      metadata: newMetadata,
-    );
+    return target.copyWith(name: newName, parentId: newParentId, type: newType, isDeleted: false, metadata: newMetadata);
   }
 
   void _applyOp(Map<String, ProtocolTask> taskMap, Operation op) {
@@ -182,23 +157,14 @@ class CRDTEngine {
       effectiveData = effectiveData['data'];
     }
 
-    final String? taskId =
-        effectiveData['id'] as String? ?? effectiveData['taskId'] as String?;
+    final String? taskId = effectiveData['id'] as String? ?? effectiveData['taskId'] as String?;
     if (taskId == null) return;
 
     final existing = taskMap[taskId];
 
     // For INSERT/UPDATE, we assume isDeleted=false (Resurrection)
     final base =
-        existing ??
-        ProtocolTask(
-          id: taskId,
-          rowId: '',
-          start: DateTime.utc(1970, 1, 1),
-          end: DateTime.utc(1970, 1, 2),
-          lastUpdated: Hlc.zero,
-          isDeleted: true,
-        );
+        existing ?? ProtocolTask(id: taskId, rowId: '', start: DateTime.utc(1970, 1, 1), end: DateTime.utc(1970, 1, 2), lastUpdated: Hlc.zero, isDeleted: true);
 
     // Inject isDeleted=false into the data to force resurrection check
     final mergeData = Map<String, dynamic>.from(effectiveData);
@@ -207,11 +173,7 @@ class CRDTEngine {
     taskMap[taskId] = _mergeTask(base, op, mergeData);
   }
 
-  ProtocolTask _mergeTask(
-    ProtocolTask target,
-    Operation op,
-    Map<String, dynamic> changes,
-  ) {
+  ProtocolTask _mergeTask(ProtocolTask target, Operation op, Map<String, dynamic> changes) {
     final newTimestamps = Map<String, Hlc>.from(target.fieldTimestamps);
 
     // Helper to check LWW per field
@@ -232,11 +194,7 @@ class CRDTEngine {
     // 1. Merge "isDeleted" (Resurrection / Deletion)
     bool newIsDeleted = target.isDeleted;
     if (changes.containsKey('isDeleted')) {
-      newIsDeleted = update<bool>(
-        'isDeleted',
-        changes['isDeleted'],
-        target.isDeleted,
-      );
+      newIsDeleted = update<bool>('isDeleted', changes['isDeleted'], target.isDeleted);
     }
 
     // 2. Merge Properties
@@ -246,8 +204,7 @@ class CRDTEngine {
     }
 
     DateTime newStart = target.start;
-    final startVal =
-        changes['start'] ?? changes['startDate'] ?? changes['start_date'];
+    final startVal = changes['start'] ?? changes['startDate'] ?? changes['start_date'];
     if (startVal != null) {
       final parsed = _parseDate(startVal);
       if (parsed != null) newStart = update('start', parsed, target.start);
@@ -267,20 +224,12 @@ class CRDTEngine {
 
     double newCompletion = target.completion;
     if (changes.containsKey('completion')) {
-      newCompletion = update(
-        'completion',
-        (changes['completion'] as num).toDouble(),
-        target.completion,
-      );
+      newCompletion = update('completion', (changes['completion'] as num).toDouble(), target.completion);
     }
 
     String? newResourceId = target.resourceId;
     if (changes.containsKey('resourceId')) {
-      newResourceId = update(
-        'resourceId',
-        changes['resourceId'],
-        target.resourceId,
-      );
+      newResourceId = update('resourceId', changes['resourceId'], target.resourceId);
     }
 
     String? newParentId = target.parentId;
@@ -295,20 +244,12 @@ class CRDTEngine {
 
     bool newIsSummary = target.isSummary;
     if (changes.containsKey('isSummary')) {
-      newIsSummary = update(
-        'isSummary',
-        changes['isSummary'] == true,
-        target.isSummary,
-      );
+      newIsSummary = update('isSummary', changes['isSummary'] == true, target.isSummary);
     }
 
     bool newIsMilestone = target.isMilestone;
     if (changes.containsKey('isMilestone')) {
-      newIsMilestone = update(
-        'isMilestone',
-        changes['isMilestone'] == true,
-        target.isMilestone,
-      );
+      newIsMilestone = update('isMilestone', changes['isMilestone'] == true, target.isMilestone);
     }
 
     // Metadata Merging (Generalized LWW)
@@ -367,12 +308,8 @@ class CRDTEngine {
       isMilestone: newIsMilestone,
       fieldTimestamps: newTimestamps,
       isDeleted: newIsDeleted,
-      lastUpdated: op.timestamp > target.lastUpdated
-          ? op.timestamp
-          : target.lastUpdated,
-      lastUpdatedBy: op.timestamp > target.lastUpdated
-          ? op.actorId
-          : target.lastUpdatedBy,
+      lastUpdated: op.timestamp > target.lastUpdated ? op.timestamp : target.lastUpdated,
+      lastUpdatedBy: op.timestamp > target.lastUpdated ? op.actorId : target.lastUpdatedBy,
       metadata: newMetadata,
     );
   }
@@ -391,11 +328,7 @@ class CRDTEngine {
   }
 
   /// Computes the Merkle Root for a list of tasks and dependencies using the deterministic content hash.
-  String computeMerkleRoot(
-    List<ProtocolTask> tasks, {
-    List<ProtocolDependency> dependencies = const [],
-    List<ProtocolResource> resources = const [],
-  }) {
+  String computeMerkleRoot(List<ProtocolTask> tasks, {List<ProtocolDependency> dependencies = const [], List<ProtocolResource> resources = const []}) {
     final taskHashes = tasks.map((t) => t.contentHash);
     final depHashes = dependencies.map((d) => d.contentHash);
     final resourceHashes = resources.map((r) => r.contentHash);
@@ -415,26 +348,12 @@ class CRDTEngine {
     String? actorId,
     Map<String, dynamic> metadata = const {},
   }) {
-    final root = computeMerkleRoot(
-      tasks,
-      dependencies: dependencies,
-      resources: resources,
-    );
-    return ProtocolTag(
-      id: id,
-      name: name,
-      merkleRoot: root,
-      timestamp: timestamp,
-      actorId: actorId,
-      metadata: metadata,
-    );
+    final root = computeMerkleRoot(tasks, dependencies: dependencies, resources: resources);
+    return ProtocolTag(id: id, name: name, merkleRoot: root, timestamp: timestamp, actorId: actorId, metadata: metadata);
   }
 
   /// Merges a list of tags with a list of operations (CREATE_TAG, DELETE_TAG).
-  List<ProtocolTag> mergeTags(
-    List<ProtocolTag> currentTags,
-    List<Operation> operations,
-  ) {
+  List<ProtocolTag> mergeTags(List<ProtocolTag> currentTags, List<Operation> operations) {
     final tagMap = {for (var t in currentTags) t.id: t};
 
     for (var op in operations) {

@@ -34,4 +34,7 @@ abstract class GanttSyncClient {
   /// Returns the current Hybrid Logical Clock timestamp.
   /// Implementations should return the latest known HLC, creating one if necessary.
   Hlc get currentHlc;
+
+  /// Returns the ID of the local actor (e.g. 'client-123' or 'user@example.com').
+  String get actorId;
 }

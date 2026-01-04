@@ -15,5 +15,7 @@ export 'src/sync/hlc.dart';
 export 'src/sync/crdt_engine.dart';
 export 'src/sync/merkle_tree.dart';
 
+export 'src/audit/causal_integrity_audit.dart';
+
 export 'src/client/gantt_sync_client.dart';
 export 'src/client/sync_stats.dart';
