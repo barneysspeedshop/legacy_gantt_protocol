@@ -81,6 +81,7 @@ void main() {
 
       expect(json, {
         'type': 'insert',
+        'schemaVersion': 1,
         'data': {'id': 1, 'name': 'task'},
         'timestamp': Hlc.fromIntTimestamp(1000).toString(),
         'actorId': 'abc',
