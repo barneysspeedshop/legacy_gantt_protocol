@@ -8,14 +8,28 @@ import '../sync/hlc.dart';
 /// A [ProtocolTag] captures the Merkle Root of the project at a specific point in time,
 /// serving as a "Baseline" for regulatory compliance or versioning.
 class ProtocolTag {
+  /// The unique identifier of the tag.
   final String id;
+
+  /// The human-readable name of the tag.
   final String name;
+
+  /// The Merkle Root hash representing the state at this tag's creation time.
   final String merkleRoot;
-  final Hlc timestamp; // When the tag was created
-  final String? actorId; // Who created it
+
+  /// When the tag was created (HLC).
+  final Hlc timestamp;
+
+  /// The ID of the actor who created the tag.
+  final String? actorId;
+
+  /// Whether the tag is marked as deleted.
   final bool isDeleted;
+
+  /// Arbitrary metadata associated with the tag.
   final Map<String, dynamic> metadata;
 
+  /// Creates a [ProtocolTag].
   const ProtocolTag({
     required this.id,
     required this.name,
@@ -45,6 +59,7 @@ class ProtocolTag {
     return digest.toString();
   }
 
+  /// Creates a [ProtocolTag] from a JSON map.
   factory ProtocolTag.fromJson(Map<String, dynamic> json) {
     Hlc parsedTimestamp = Hlc.zero;
     if (json['timestamp'] is String) {
@@ -62,6 +77,7 @@ class ProtocolTag {
     );
   }
 
+  /// Converts the tag to a JSON map.
   Map<String, dynamic> toJson() => {
     'id': id,
     'name': name,
@@ -72,6 +88,7 @@ class ProtocolTag {
     'metadata': metadata,
   };
 
+  /// Creates a copy of this tag with the given fields replaced with new values.
   ProtocolTag copyWith({
     String? id,
     String? name,

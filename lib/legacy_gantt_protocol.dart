@@ -1,3 +1,8 @@
+/// The core protocol library for legacy_gantt_sync.
+///
+/// This library defines the data models (Tasks, Dependencies, Resources),
+/// the synchronization primitives (HLCs, Merkle Trees, CRDT Engine), and
+/// the client interface for building distributed Gantt Chart applications.
 library legacy_gantt_protocol;
 
 export 'src/models/operation.dart';

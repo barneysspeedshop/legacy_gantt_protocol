@@ -5,10 +5,16 @@ import 'dart:math';
 /// Combines physical time with a logical counter to provide a unique, monotonically
 /// increasing timestamp for distributed systems.
 class Hlc implements Comparable<Hlc> {
+  /// The physical time component (milliseconds since epoch).
   final int millis;
+
+  /// The logical counter component, used to distinguish events within the same millisecond.
   final int counter;
+
+  /// The unique identifier of the node that generated this timestamp.
   final String nodeId;
 
+  /// Creates a Hybrid Logical Clock timestamp.
   const Hlc({
     required this.millis,
     required this.counter,

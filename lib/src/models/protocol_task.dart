@@ -4,27 +4,57 @@ import '../sync/hlc.dart';
 
 /// Represents a task in the protocol layer (headless).
 class ProtocolTask {
+  /// The unique identifier for the task.
   final String id;
+
+  /// The ID of the row this task belongs to.
   final String rowId;
+
+  /// The start time of the task (UTC).
   final DateTime start;
+
+  /// The end time of the task (UTC).
   final DateTime end;
+
+  /// The display name of the task.
   final String? name;
+
+  /// The completion percentage of the task (0.0 to 1.0).
   final double completion;
+
+  /// Whether this task represents a summary of other tasks.
   final bool isSummary;
+
+  /// Whether this task represents a milestone (zero duration).
   final bool isMilestone;
+
+  /// The ID of the resource assigned to this task.
   final String? resourceId;
+
+  /// The ID of the parent task, for hierarchical structures.
   final String? parentId;
+
+  /// Additional notes or description for the task.
   final String? notes;
+
+  /// Whether the task has been marked as deleted (tombstone).
   final bool isDeleted;
 
+  /// The Hybrid Logical Clock timestamp of the last update to this task.
   final Hlc lastUpdated;
+
+  /// The ID of the actor who last updated this task.
   final String? lastUpdatedBy;
+
+  /// A map of field names to HLC timestamps, tracking the last update time for each field.
+  /// Used for field-level Conflict Resolution (CRDT).
   final Map<String, Hlc> fieldTimestamps;
 
   /// Additional metadata for UI or implementation-specific fields (Color, etc).
   /// These are not part of the core comparison identity usually, but MIGHT be part of sync.
   final Map<String, dynamic> metadata;
 
+  /// Creates a [ProtocolTask] with the given properties.
   const ProtocolTask({
     required this.id,
     required this.rowId,
@@ -44,6 +74,7 @@ class ProtocolTask {
     this.metadata = const {},
   });
 
+  /// Creates a [ProtocolTask] instance from a JSON map.
   factory ProtocolTask.fromJson(Map<String, dynamic> json) {
     Hlc parsedHlc = Hlc.zero;
     if (json['lastUpdated'] is String) {
@@ -77,6 +108,7 @@ class ProtocolTask {
     );
   }
 
+  /// Converts the [ProtocolTask] to a JSON map.
   Map<String, dynamic> toJson() => {
     'id': id,
     'rowId': rowId,
@@ -96,6 +128,8 @@ class ProtocolTask {
     'metadata': metadata,
   };
 
+  /// Computes a deterministic SHA-256 hash of the task's content.
+  /// Used for Merkle Tree computation to detect state differences.
   String get contentHash {
     // Hashes core data and metadata.
     // Ensure map keys are sorted for deterministic hashing if needed.
@@ -123,6 +157,7 @@ class ProtocolTask {
     return digest.toString();
   }
 
+  /// Creates a copy of this task with the given fields replaced with new values.
   ProtocolTask copyWith({
     String? id,
     String? rowId,

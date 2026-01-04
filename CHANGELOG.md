@@ -1,3 +1,7 @@
+## 1.0.4
+
+* **DOCS**: Added 100% dartdoc coverage to public APIs.
+
 ## 1.0.3
 
 * **CHORE**: Fix lint.
