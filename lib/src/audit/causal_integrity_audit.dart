@@ -44,7 +44,8 @@ class CausalIntegrityAudit {
     }
 
     // Check for Task ID in various common fields
-    final String? taskId = effectiveData['id'] as String? ?? effectiveData['taskId'] as String?;
+    final String? taskId =
+        effectiveData['id'] as String? ?? effectiveData['taskId'] as String?;
 
     if (taskId != null) {
       _taskIndex.putIfAbsent(taskId, () => []).add(parentOp ?? op);
@@ -62,16 +63,32 @@ class CausalIntegrityAudit {
   /// Analyzes a conflict between two operations affecting the same field.
   ///
   /// Returns a [ConflictAnalysis] describing the winner and the reason.
-  ConflictAnalysis analyzeConflict(Operation opA, Operation opB, String fieldId) {
+  ConflictAnalysis analyzeConflict(
+    Operation opA,
+    Operation opB,
+    String fieldId,
+  ) {
     final tA = opA.timestamp;
     final tB = opB.timestamp;
 
     // 1. Physical Time Comparison
     if (tA.millis > tB.millis) {
-      return ConflictAnalysis(winner: opA, loser: opB, fieldId: fieldId, reason: 'Operation A has a later physical time (${tA.millis} > ${tB.millis}).');
+      return ConflictAnalysis(
+        winner: opA,
+        loser: opB,
+        fieldId: fieldId,
+        reason:
+            'Operation A has a later physical time (${tA.millis} > ${tB.millis}).',
+      );
     }
     if (tB.millis > tA.millis) {
-      return ConflictAnalysis(winner: opB, loser: opA, fieldId: fieldId, reason: 'Operation B has a later physical time (${tB.millis} > ${tA.millis}).');
+      return ConflictAnalysis(
+        winner: opB,
+        loser: opA,
+        fieldId: fieldId,
+        reason:
+            'Operation B has a later physical time (${tB.millis} > ${tA.millis}).',
+      );
     }
 
     // 2. Logical Counter Comparison
@@ -80,7 +97,8 @@ class CausalIntegrityAudit {
         winner: opA,
         loser: opB,
         fieldId: fieldId,
-        reason: 'Physical time is equal, but Operation A has a higher logical counter (${tA.counter} > ${tB.counter}).',
+        reason:
+            'Physical time is equal, but Operation A has a higher logical counter (${tA.counter} > ${tB.counter}).',
       );
     }
     if (tB.counter > tA.counter) {
@@ -88,7 +106,8 @@ class CausalIntegrityAudit {
         winner: opB,
         loser: opA,
         fieldId: fieldId,
-        reason: 'Physical time is equal, but Operation B has a higher logical counter (${tB.counter} > ${tA.counter}).',
+        reason:
+            'Physical time is equal, but Operation B has a higher logical counter (${tB.counter} > ${tA.counter}).',
       );
     }
 
@@ -99,18 +118,25 @@ class CausalIntegrityAudit {
         winner: opA,
         loser: opB,
         fieldId: fieldId,
-        reason: 'Time and counters are equal. Operation A wins by Node ID tie-breaker (${tA.nodeId} > ${tB.nodeId}).',
+        reason:
+            'Time and counters are equal. Operation A wins by Node ID tie-breaker (${tA.nodeId} > ${tB.nodeId}).',
       );
     } else if (nodeComp < 0) {
       return ConflictAnalysis(
         winner: opB,
         loser: opA,
         fieldId: fieldId,
-        reason: 'Time and counters are equal. Operation B wins by Node ID tie-breaker (${tB.nodeId} > ${tA.nodeId}).',
+        reason:
+            'Time and counters are equal. Operation B wins by Node ID tie-breaker (${tB.nodeId} > ${tA.nodeId}).',
       );
     }
 
-    return ConflictAnalysis(winner: opA, loser: opB, fieldId: fieldId, reason: 'Operations are identical or fully equivalent timestamps.');
+    return ConflictAnalysis(
+      winner: opA,
+      loser: opB,
+      fieldId: fieldId,
+      reason: 'Operations are identical or fully equivalent timestamps.',
+    );
   }
 
   /// Returns the full session history.
@@ -138,5 +164,10 @@ class ConflictAnalysis {
   final String reason;
 
   /// Creates a [ConflictAnalysis] result.
-  ConflictAnalysis({required this.winner, required this.loser, required this.fieldId, required this.reason});
+  ConflictAnalysis({
+    required this.winner,
+    required this.loser,
+    required this.fieldId,
+    required this.reason,
+  });
 }

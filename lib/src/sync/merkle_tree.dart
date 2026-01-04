@@ -11,7 +11,8 @@ class MerkleNode {
 
   /// The inclusive start of the HLC range covered by this node.
   /// The inclusive start of the HLC range covered by this node.
-  final Hlc? rangeStart; // Null for leaf nodes if we treat them specifically, but for time-based, it's the range
+  final Hlc?
+  rangeStart; // Null for leaf nodes if we treat them specifically, but for time-based, it's the range
 
   /// The exclusive end of the HLC range covered by this node.
   final Hlc? rangeEnd;
@@ -23,7 +24,13 @@ class MerkleNode {
   final int count; // Number of items in this subtree
 
   /// Creates a [MerkleNode].
-  MerkleNode({required this.hash, this.rangeStart, this.rangeEnd, this.children = const [], this.count = 0});
+  MerkleNode({
+    required this.hash,
+    this.rangeStart,
+    this.rangeEnd,
+    this.children = const [],
+    this.count = 0,
+  });
 
   /// Converts the node to a JSON map.
   Map<String, dynamic> toJson() => {
@@ -61,5 +68,6 @@ class MerkleTree {
   }
 
   /// Computes the Merkle Root for a list of content hashes.
-  static String computeRoot(List<String> validContentHashes) => combineHashes(validContentHashes);
+  static String computeRoot(List<String> validContentHashes) =>
+      combineHashes(validContentHashes);
 }
