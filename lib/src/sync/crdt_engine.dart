@@ -103,8 +103,7 @@ class CRDTEngine {
 
     final existing = resourceMap[resourceId];
     // If not exists, create new
-    final base =
-        existing ??
+    final base = existing ??
         ProtocolResource(
           id: resourceId,
           name: '',
@@ -163,8 +162,7 @@ class CRDTEngine {
       final existing = taskMap[taskId];
 
       // Basic tombstone creation
-      final base =
-          existing ??
+      final base = existing ??
           ProtocolTask(
             id: taskId,
             rowId: '',
@@ -191,8 +189,7 @@ class CRDTEngine {
     final existing = taskMap[taskId];
 
     // For INSERT/UPDATE, we assume isDeleted=false (Resurrection)
-    final base =
-        existing ??
+    final base = existing ??
         ProtocolTask(
           id: taskId,
           rowId: '',
@@ -369,12 +366,10 @@ class CRDTEngine {
       isMilestone: newIsMilestone,
       fieldTimestamps: newTimestamps,
       isDeleted: newIsDeleted,
-      lastUpdated: op.timestamp > target.lastUpdated
-          ? op.timestamp
-          : target.lastUpdated,
-      lastUpdatedBy: op.timestamp > target.lastUpdated
-          ? op.actorId
-          : target.lastUpdatedBy,
+      lastUpdated:
+          op.timestamp > target.lastUpdated ? op.timestamp : target.lastUpdated,
+      lastUpdatedBy:
+          op.timestamp > target.lastUpdated ? op.actorId : target.lastUpdatedBy,
       metadata: newMetadata,
     );
   }

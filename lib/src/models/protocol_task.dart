@@ -110,23 +110,24 @@ class ProtocolTask {
 
   /// Converts the [ProtocolTask] to a JSON map.
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'rowId': rowId,
-    'start': start.toUtc().toIso8601String(),
-    'end': end.toUtc().toIso8601String(),
-    'name': name,
-    'completion': completion,
-    'isSummary': isSummary,
-    'isMilestone': isMilestone,
-    'resourceId': resourceId,
-    'parentId': parentId,
-    'notes': notes,
-    'isDeleted': isDeleted,
-    'lastUpdated': lastUpdated.toString(),
-    'lastUpdatedBy': lastUpdatedBy,
-    'fieldTimestamps': fieldTimestamps.map((k, v) => MapEntry(k, v.toString())),
-    'metadata': metadata,
-  };
+        'id': id,
+        'rowId': rowId,
+        'start': start.toUtc().toIso8601String(),
+        'end': end.toUtc().toIso8601String(),
+        'name': name,
+        'completion': completion,
+        'isSummary': isSummary,
+        'isMilestone': isMilestone,
+        'resourceId': resourceId,
+        'parentId': parentId,
+        'notes': notes,
+        'isDeleted': isDeleted,
+        'lastUpdated': lastUpdated.toString(),
+        'lastUpdatedBy': lastUpdatedBy,
+        'fieldTimestamps':
+            fieldTimestamps.map((k, v) => MapEntry(k, v.toString())),
+        'metadata': metadata,
+      };
 
   /// Computes a deterministic SHA-256 hash of the task's content.
   /// Used for Merkle Tree computation to detect state differences.

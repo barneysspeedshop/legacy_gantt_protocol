@@ -75,10 +75,10 @@ class ProtocolDependency {
 
   /// Converts the dependency to a JSON map.
   Map<String, dynamic> toJson() => {
-    'predecessorTaskId': predecessorTaskId,
-    'successorTaskId': successorTaskId,
-    'type': type.name,
-    'lag': lag?.inMilliseconds,
-    'lastUpdated': lastUpdated,
-  };
+        'predecessorTaskId': predecessorTaskId,
+        'successorTaskId': successorTaskId,
+        'type': type.name,
+        'lag': lag?.inMilliseconds,
+        'lastUpdated': lastUpdated,
+      };
 }

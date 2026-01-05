@@ -60,13 +60,13 @@ class ProtocolResource {
 
   /// Converts the resource to a JSON map.
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'parentId': parentId,
-    'type': type,
-    'isDeleted': isDeleted,
-    'metadata': metadata,
-  };
+        'id': id,
+        'name': name,
+        'parentId': parentId,
+        'type': type,
+        'isDeleted': isDeleted,
+        'metadata': metadata,
+      };
 
   /// Creates a copy of this resource with the given fields replaced with new values.
   ProtocolResource copyWith({
@@ -76,12 +76,13 @@ class ProtocolResource {
     String? type,
     bool? isDeleted,
     Map<String, dynamic>? metadata,
-  }) => ProtocolResource(
-    id: id ?? this.id,
-    name: name ?? this.name,
-    parentId: parentId ?? this.parentId,
-    type: type ?? this.type,
-    isDeleted: isDeleted ?? this.isDeleted,
-    metadata: metadata ?? this.metadata,
-  );
+  }) =>
+      ProtocolResource(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        parentId: parentId ?? this.parentId,
+        type: type ?? this.type,
+        isDeleted: isDeleted ?? this.isDeleted,
+        metadata: metadata ?? this.metadata,
+      );
 }

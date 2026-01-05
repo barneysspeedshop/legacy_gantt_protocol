@@ -12,7 +12,7 @@ class MerkleNode {
   /// The inclusive start of the HLC range covered by this node.
   /// The inclusive start of the HLC range covered by this node.
   final Hlc?
-  rangeStart; // Null for leaf nodes if we treat them specifically, but for time-based, it's the range
+      rangeStart; // Null for leaf nodes if we treat them specifically, but for time-based, it's the range
 
   /// The exclusive end of the HLC range covered by this node.
   final Hlc? rangeEnd;
@@ -34,12 +34,12 @@ class MerkleNode {
 
   /// Converts the node to a JSON map.
   Map<String, dynamic> toJson() => {
-    'hash': hash,
-    'rangeStart': rangeStart?.toString(),
-    'rangeEnd': rangeEnd?.toString(),
-    'children': children.map((c) => c.toJson()).toList(),
-    'count': count,
-  };
+        'hash': hash,
+        'rangeStart': rangeStart?.toString(),
+        'rangeEnd': rangeEnd?.toString(),
+        'children': children.map((c) => c.toJson()).toList(),
+        'count': count,
+      };
 }
 
 /// A simplified time-based Merkle Tree implementation.

@@ -79,14 +79,14 @@ class ProtocolTag {
 
   /// Converts the tag to a JSON map.
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'merkleRoot': merkleRoot,
-    'timestamp': timestamp.toString(),
-    'actorId': actorId,
-    'isDeleted': isDeleted,
-    'metadata': metadata,
-  };
+        'id': id,
+        'name': name,
+        'merkleRoot': merkleRoot,
+        'timestamp': timestamp.toString(),
+        'actorId': actorId,
+        'isDeleted': isDeleted,
+        'metadata': metadata,
+      };
 
   /// Creates a copy of this tag with the given fields replaced with new values.
   ProtocolTag copyWith({

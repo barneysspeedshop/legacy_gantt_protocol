@@ -26,10 +26,10 @@ class Hlc implements Comparable<Hlc> {
 
   /// Creates an HLC from a DateTime and nodeId.
   factory Hlc.fromDate(DateTime dateTime, String nodeId) => Hlc(
-    millis: dateTime.toUtc().millisecondsSinceEpoch,
-    counter: 0,
-    nodeId: nodeId,
-  );
+        millis: dateTime.toUtc().millisecondsSinceEpoch,
+        counter: 0,
+        nodeId: nodeId,
+      );
 
   /// Creates an HLC from a legacy int timestamp.
   factory Hlc.fromIntTimestamp(int timestamp) =>
@@ -54,9 +54,8 @@ class Hlc implements Comparable<Hlc> {
       final nodeId = match.group(3)!;
 
       // Ensure UTC parsing by appending Z if missing
-      final normalizedIso = isoTimestamp.endsWith('Z')
-          ? isoTimestamp
-          : '${isoTimestamp}Z';
+      final normalizedIso =
+          isoTimestamp.endsWith('Z') ? isoTimestamp : '${isoTimestamp}Z';
       final dateTime = DateTime.parse(normalizedIso);
       return Hlc(
         millis: dateTime.millisecondsSinceEpoch,
@@ -73,9 +72,8 @@ class Hlc implements Comparable<Hlc> {
       final isoTimestamp = match.group(1)!;
       final counterString = match.group(2)!;
       try {
-        final normalizedIso = isoTimestamp.endsWith('Z')
-            ? isoTimestamp
-            : '${isoTimestamp}Z';
+        final normalizedIso =
+            isoTimestamp.endsWith('Z') ? isoTimestamp : '${isoTimestamp}Z';
         final dateTime = DateTime.parse(normalizedIso);
         return Hlc(
           millis: dateTime.millisecondsSinceEpoch,

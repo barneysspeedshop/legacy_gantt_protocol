@@ -29,12 +29,12 @@ class Operation {
 
   /// Converts the operation to a JSON map.
   Map<String, dynamic> toJson() => {
-    'type': type,
-    'schemaVersion': schemaVersion,
-    'data': data,
-    'timestamp': timestamp.toString(),
-    'actorId': actorId,
-  };
+        'type': type,
+        'schemaVersion': schemaVersion,
+        'data': data,
+        'timestamp': timestamp.toString(),
+        'actorId': actorId,
+      };
 
   /// Creates an [Operation] from a JSON map.
   factory Operation.fromJson(Map<String, dynamic> json) {
