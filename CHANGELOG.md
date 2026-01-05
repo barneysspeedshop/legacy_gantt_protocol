@@ -1,3 +1,7 @@
+## 1.0.6
+
+* **FIX**: Redo fix SDK version
+
 ## 1.0.5
 
 * **FIX**: Fix SDK version compatibility.
