@@ -1,3 +1,12 @@
+## 2.0.0
+
+*   **FEAT**: Improved Merkle Tree implementation with time-based bucketing (Hour/Day prefixes) and prefix-based traversal support.
+*   **FEAT**: Added `computeMerkleTree` to `CRDTEngine` for deterministic synchronization of tasks, resources, and dependencies.
+*   **FEAT**: Added `lastUpdated` (Hlc) to `ProtocolResource`.
+*   **BREAKING CHANGE**: Updated `GanttSyncClient.syncWithMerkle` signature to require a `MerkleTree` object.
+*   **BREAKING CHANGE**: Migrated `ProtocolDependency.lastUpdated` from `int` to `Hlc` for improved conflict resolution.
+*   **FIX**: Improved JSON deserialization for `lastUpdated` fields to support both String and Integer formats for backward compatibility.
+
 ## 1.0.6
 
 * **FIX**: Redo fix SDK version

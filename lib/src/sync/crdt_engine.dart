@@ -108,6 +108,7 @@ class CRDTEngine {
           id: resourceId,
           name: '',
           isDeleted: true, // will be resurrected
+          lastUpdated: Hlc.zero,
         );
 
     resourceMap[resourceId] = _mergeResource(base, op, effectiveData);
@@ -139,6 +140,7 @@ class CRDTEngine {
         'ganttType',
         'isDeleted',
         'data',
+        'lastUpdated',
       ].contains(key)) {
         newMetadata[key] = value;
       }
@@ -151,6 +153,9 @@ class CRDTEngine {
       type: newType,
       isDeleted: false,
       metadata: newMetadata,
+      lastUpdated: op.timestamp > (target.lastUpdated ?? Hlc.zero)
+          ? op.timestamp
+          : target.lastUpdated,
     );
   }
 
@@ -387,18 +392,42 @@ class CRDTEngine {
     return null;
   }
 
+  /// Computes the full Merkle Tree for a list of tasks and dependencies using the deterministic content hash.
+  MerkleTree computeMerkleTree(
+    List<ProtocolTask> tasks, {
+    List<ProtocolDependency> dependencies = const [],
+    List<ProtocolResource> resources = const [],
+  }) {
+    final List<MapEntry<String, String>> items = [];
+
+    for (final t in tasks) {
+      if (!t.isDeleted) {
+        items.add(MapEntry(t.lastUpdated.toString(), t.contentHash));
+      }
+    }
+    for (final d in dependencies) {
+      final hlc = d.lastUpdated ?? Hlc.zero;
+      items.add(MapEntry(hlc.toString(), d.contentHash));
+    }
+    for (final r in resources) {
+      if (!r.isDeleted) {
+        final hlc = r.lastUpdated ?? Hlc.zero;
+        items.add(MapEntry(hlc.toString(), r.contentHash));
+      }
+    }
+
+    return MerkleTree.build(items);
+  }
+
   /// Computes the Merkle Root for a list of tasks and dependencies using the deterministic content hash.
   String computeMerkleRoot(
     List<ProtocolTask> tasks, {
     List<ProtocolDependency> dependencies = const [],
     List<ProtocolResource> resources = const [],
   }) {
-    final taskHashes = tasks.map((t) => t.contentHash);
-    final depHashes = dependencies.map((d) => d.contentHash);
-    final resourceHashes = resources.map((r) => r.contentHash);
-    final allHashes = [...taskHashes, ...depHashes, ...resourceHashes];
-
-    return MerkleTree.computeRoot(allHashes.toList());
+    final tree = computeMerkleTree(tasks,
+        dependencies: dependencies, resources: resources);
+    return tree.root.hash;
   }
 
   /// Creates a new immutable Snapshot Tag for the current state.

@@ -12,8 +12,7 @@ class MockWebSocketClient implements GanttSyncClient {
 
   @override
   Future<void> syncWithMerkle({
-    required String remoteRoot,
-    required int depth,
+    required MerkleTree localTree,
   }) async {
     syncCalled = true;
   }
@@ -69,8 +68,9 @@ void main() {
 
       if (currentLocalRoot != await client.getMerkleRoot()) {
         await client.syncWithMerkle(
-          remoteRoot: await client.getMerkleRoot(),
-          depth: 0,
+          localTree: MerkleTree.build(tasks
+              .map((t) => MapEntry(t.lastUpdated.toString(), t.contentHash))
+              .toList()),
         );
       }
 
@@ -102,8 +102,9 @@ void main() {
 
       if (currentLocalRoot != await client.getMerkleRoot()) {
         await client.syncWithMerkle(
-          remoteRoot: await client.getMerkleRoot(),
-          depth: 0,
+          localTree: MerkleTree.build(tasks
+              .map((t) => MapEntry(t.lastUpdated.toString(), t.contentHash))
+              .toList()),
         );
       }
 

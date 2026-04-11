@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import '../sync/hlc.dart';
 
 /// Defines the type of dependency between two tasks.
 enum ProtocolDependencyType {
@@ -34,7 +35,7 @@ class ProtocolDependency {
   final Duration? lag;
 
   /// optional metadata field for last updated timestamp.
-  final int? lastUpdated; // Optional metadata
+  final Hlc? lastUpdated; // Optional metadata
 
   /// Creates a [ProtocolDependency].
   const ProtocolDependency({
@@ -69,7 +70,11 @@ class ProtocolDependency {
         orElse: () => ProtocolDependencyType.finishToStart,
       ),
       lag: json['lag'] != null ? Duration(milliseconds: json['lag']) : null,
-      lastUpdated: json['lastUpdated'],
+      lastUpdated: json['lastUpdated'] != null
+          ? (json['lastUpdated'] is String
+              ? Hlc.parse(json['lastUpdated'])
+              : Hlc.fromIntTimestamp(json['lastUpdated']))
+          : null,
     );
   }
 
@@ -79,6 +84,6 @@ class ProtocolDependency {
         'successorTaskId': successorTaskId,
         'type': type.name,
         'lag': lag?.inMilliseconds,
-        'lastUpdated': lastUpdated,
+        'lastUpdated': lastUpdated?.toString(),
       };
 }

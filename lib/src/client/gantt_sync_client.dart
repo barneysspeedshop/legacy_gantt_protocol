@@ -1,6 +1,7 @@
 import 'dart:async';
 import '../models/operation.dart';
 import '../sync/hlc.dart';
+import '../sync/merkle_tree.dart';
 import 'sync_stats.dart';
 
 /// Interface for the synchronization client.
@@ -29,7 +30,7 @@ abstract class GanttSyncClient {
   Future<String> getMerkleRoot();
 
   /// Initiates a Merkle-tree based synchronization with a remote peer/server.
-  Future<void> syncWithMerkle({required String remoteRoot, required int depth});
+  Future<void> syncWithMerkle({required MerkleTree localTree});
 
   /// Returns the current Hybrid Logical Clock timestamp.
   /// Implementations should return the latest known HLC, creating one if necessary.

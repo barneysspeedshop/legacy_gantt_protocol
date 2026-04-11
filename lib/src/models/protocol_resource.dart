@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import '../sync/hlc.dart';
 
 /// Represents a resource (person, equipment, etc.) in the Gantt project.
 class ProtocolResource {
@@ -21,6 +22,9 @@ class ProtocolResource {
   /// Extra properties (isExpanded, etc) or implementation-specific metadata.
   final Map<String, dynamic> metadata;
 
+  /// The Hybrid Logical Clock timestamp of the last update.
+  final Hlc? lastUpdated;
+
   /// Creates a [ProtocolResource].
   const ProtocolResource({
     required this.id,
@@ -29,6 +33,7 @@ class ProtocolResource {
     this.type = 'person',
     this.isDeleted = false,
     this.metadata = const {},
+    this.lastUpdated,
   });
 
   /// Computes a deterministic SHA-256 hash of the resource content.
@@ -56,6 +61,11 @@ class ProtocolResource {
         type: json['type'] ?? 'person',
         isDeleted: json['isDeleted'] == true,
         metadata: json['metadata'] ?? {},
+        lastUpdated: json['lastUpdated'] != null
+            ? (json['lastUpdated'] is String
+                ? Hlc.parse(json['lastUpdated'])
+                : Hlc.fromIntTimestamp(json['lastUpdated']))
+            : null,
       );
 
   /// Converts the resource to a JSON map.
@@ -66,6 +76,7 @@ class ProtocolResource {
         'type': type,
         'isDeleted': isDeleted,
         'metadata': metadata,
+        'lastUpdated': lastUpdated?.toString(),
       };
 
   /// Creates a copy of this resource with the given fields replaced with new values.
@@ -76,6 +87,7 @@ class ProtocolResource {
     String? type,
     bool? isDeleted,
     Map<String, dynamic>? metadata,
+    Hlc? lastUpdated,
   }) =>
       ProtocolResource(
         id: id ?? this.id,
@@ -84,5 +96,6 @@ class ProtocolResource {
         type: type ?? this.type,
         isDeleted: isDeleted ?? this.isDeleted,
         metadata: metadata ?? this.metadata,
+        lastUpdated: lastUpdated ?? this.lastUpdated,
       );
 }
