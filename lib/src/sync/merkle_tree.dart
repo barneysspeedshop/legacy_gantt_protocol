@@ -76,6 +76,22 @@ class MerkleTree {
   static String computeRoot(List<String> validContentHashes) =>
       combineHashes(validContentHashes);
 
+  /// Encodes a map into a JSON string with sorted keys to ensure deterministic results.
+  static String deterministicJsonEncode(dynamic data) {
+    if (data is Map) {
+      final sortedMap = <String, dynamic>{};
+      final keys = data.keys.map((e) => e.toString()).toList()..sort();
+      for (final key in keys) {
+        sortedMap[key] = deterministicJsonEncode(data[key]);
+      }
+      return jsonEncode(sortedMap);
+    } else if (data is List) {
+      return jsonEncode(
+          data.map((item) => deterministicJsonEncode(item)).toList());
+    }
+    return jsonEncode(data);
+  }
+
   /// Builds a Merkle Tree from a map of HLC strings to content hashes.
   static MerkleTree build(List<MapEntry<String, String>> items) {
     // 1. Group items by Hour prefix (length 13: YYYY-MM-DDTHH)
@@ -85,14 +101,14 @@ class MerkleTree {
       final hlcStr = entry.key;
       final contentHash = entry.value;
 
-      // Extract ISO prefix "YYYY-MM-DDTHH" (13 chars)
-      // If invalid or too short, bucket into a default "0000-00-00T00"
-      String hourPrefix = '0000-00-00T00';
-      if (hlcStr.length >= 13 && hlcStr.contains('T')) {
-        hourPrefix = hlcStr.substring(0, 13);
+      // Extract ISO prefix "YYYY-MM-DDTHH:mm" (16 chars)
+      // If invalid or too short, bucket into a default "0000-00-00T00:00"
+      String minutePrefix = '0000-00-00T00:00';
+      if (hlcStr.length >= 16 && hlcStr.contains('T') && hlcStr.contains(':')) {
+        minutePrefix = hlcStr.substring(0, 16);
       }
 
-      hourBuckets.putIfAbsent(hourPrefix, () => []).add(contentHash);
+      hourBuckets.putIfAbsent(minutePrefix, () => []).add(contentHash);
     }
 
     // 2. Build Hour Nodes (Leaves of the bucket tree)
@@ -157,7 +173,7 @@ class MerkleTree {
 
     if (prefix.length == 10) {
       return root.children[prefix];
-    } else if (prefix.length == 13) {
+    } else if (prefix.length == 16) {
       final dayPrefix = prefix.substring(0, 10);
       final dayNode = root.children[dayPrefix];
       return dayNode?.children[prefix];

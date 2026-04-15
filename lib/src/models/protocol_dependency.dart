@@ -2,7 +2,10 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import '../sync/hlc.dart';
 
+import '../sync/merkle_tree.dart';
+
 /// Defines the type of dependency between two tasks.
+
 enum ProtocolDependencyType {
   /// The successor cannot start until the predecessor finishes.
   finishToStart,
@@ -54,7 +57,7 @@ class ProtocolDependency {
       'type': type.name,
       'lag': lag?.inMilliseconds,
     };
-    final jsonString = jsonEncode(data);
+    final jsonString = MerkleTree.deterministicJsonEncode(data);
     final bytes = utf8.encode(jsonString);
     final digest = sha256.convert(bytes);
     return digest.toString();

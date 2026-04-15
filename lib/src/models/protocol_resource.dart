@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import '../sync/hlc.dart';
+import '../sync/merkle_tree.dart';
 
 /// Represents a resource (person, equipment, etc.) in the Gantt project.
 class ProtocolResource {
@@ -46,7 +47,7 @@ class ProtocolResource {
       'isDeleted': isDeleted,
       'metadata': metadata,
     };
-    final jsonString = jsonEncode(data);
+    final jsonString = MerkleTree.deterministicJsonEncode(data);
     final bytes = utf8.encode(jsonString);
     final digest = sha256.convert(bytes);
     return digest.toString();

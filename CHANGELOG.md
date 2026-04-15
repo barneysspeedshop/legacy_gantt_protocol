@@ -1,3 +1,9 @@
+## 2.1.0
+
+*   **FEAT**: Increased Merkle tree granularity to **Minute-level** (16-character bucket prefixes) for more precise data reconciliation.
+*   **FEAT**: Updated `CRDTEngine.computeMerkleTree` to **include deleted items** (tombstones) in the state hash, ensuring absolute consistency between client and server.
+*   **FIX**: Implemented **deterministic JSON encoding** (sorted keys) for all protocol model hashes to prevent root mismatches across different platforms.
+
 ## 2.0.0
 
 *   **FEAT**: Improved Merkle Tree implementation with time-based bucketing (Hour/Day prefixes) and prefix-based traversal support.

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import '../sync/hlc.dart';
+import '../sync/merkle_tree.dart';
 
 /// Represents a task in the protocol layer (headless).
 class ProtocolTask {
@@ -150,9 +151,9 @@ class ProtocolTask {
       'parentId': parentId,
       'notes': notes,
       'isDeleted': isDeleted,
-      'metadata': metadata, // Include metadata in hash!
+      'metadata': metadata,
     };
-    final jsonString = jsonEncode(data);
+    final jsonString = MerkleTree.deterministicJsonEncode(data);
     final bytes = utf8.encode(jsonString);
     final digest = sha256.convert(bytes);
     return digest.toString();

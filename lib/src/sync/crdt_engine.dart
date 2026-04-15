@@ -401,19 +401,15 @@ class CRDTEngine {
     final List<MapEntry<String, String>> items = [];
 
     for (final t in tasks) {
-      if (!t.isDeleted) {
-        items.add(MapEntry(t.lastUpdated.toString(), t.contentHash));
-      }
+      items.add(MapEntry(t.lastUpdated.toString(), t.contentHash));
     }
     for (final d in dependencies) {
       final hlc = d.lastUpdated ?? Hlc.zero;
       items.add(MapEntry(hlc.toString(), d.contentHash));
     }
     for (final r in resources) {
-      if (!r.isDeleted) {
-        final hlc = r.lastUpdated ?? Hlc.zero;
-        items.add(MapEntry(hlc.toString(), r.contentHash));
-      }
+      final hlc = r.lastUpdated ?? Hlc.zero;
+      items.add(MapEntry(hlc.toString(), r.contentHash));
     }
 
     return MerkleTree.build(items);
