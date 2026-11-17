@@ -36,13 +36,9 @@ The server will start on port `8080`.
 
 ## Connecting a Client
 
-This server is fully compatible with the `legacy_gantt_chart` example app.
-
-1.  Open the Example App.
-2.  Go to **Server Sync** settings.
-3.  **Server URI**: `ws://localhost:8080/`
-4.  **Credentials**: Enter any username/password (Mock Auth accepts anything).
-5.  **Connect**: You should see the status change to "Connected" and your operations will sync.
+This server uses the older JSON protocol. It is not compatible with the current
+binary Protobuf client in `legacy_gantt_chart` 9.0. Use it only with a JSON test
+client for protocol experiments; its mock authentication is not production auth.
 
 ## Endpoints
 

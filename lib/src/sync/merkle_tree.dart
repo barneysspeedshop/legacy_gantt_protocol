@@ -36,13 +36,13 @@ class MerkleNode {
 
   /// Converts the node to a JSON map.
   Map<String, dynamic> toJson() => {
-        'hash': hash,
-        'prefix': prefix,
-        'rangeStart': rangeStart?.toString(),
-        'rangeEnd': rangeEnd?.toString(),
-        'children': children.map((key, value) => MapEntry(key, value.toJson())),
-        'count': count,
-      };
+    'hash': hash,
+    'prefix': prefix,
+    'rangeStart': rangeStart?.toString(),
+    'rangeEnd': rangeEnd?.toString(),
+    'children': children.map((key, value) => MapEntry(key, value.toJson())),
+    'count': count,
+  };
 }
 
 /// A time-based Merkle Tree implementation.
@@ -88,7 +88,8 @@ class MerkleTree {
       return jsonEncode(sortedMap);
     } else if (data is List) {
       return jsonEncode(
-          data.map((item) => deterministicJsonEncode(item)).toList());
+        data.map((item) => deterministicJsonEncode(item)).toList(),
+      );
     }
     return jsonEncode(data);
   }

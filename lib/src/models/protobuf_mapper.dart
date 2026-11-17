@@ -23,8 +23,8 @@ class ProtobufMapper {
         ..channel = (json['channel'] ?? data['channel'])?.toString() ?? ''
         ..lastSyncedTimestamp =
             (json['lastSyncedTimestamp'] ?? data['lastSyncedTimestamp'])
-                    ?.toString() ??
-                '';
+                ?.toString() ??
+            '';
     } else if (type == 'SYNC_METADATA') {
       envelope.syncMetadata = SyncMetadataPayload()
         ..totalOperations = Int64(data['totalOperations'] as int? ?? 0);
@@ -35,13 +35,16 @@ class ProtobufMapper {
         if (op is! Map<String, dynamic>) continue;
         final opType = op['type'] as String? ?? '';
         final opData = Map<String, dynamic>.from(
-            op['data'] as Map<String, dynamic>? ?? {});
+          op['data'] as Map<String, dynamic>? ?? {},
+        );
         final opTimestamp = op['timestamp']?.toString() ?? '';
 
         if (opTimestamp.isNotEmpty) {
           opData.putIfAbsent('lastUpdated', () => opTimestamp);
           opData.putIfAbsent(
-              'lastUpdatedBy', () => op['actorId']?.toString() ?? '');
+            'lastUpdatedBy',
+            () => op['actorId']?.toString() ?? '',
+          );
         }
 
         if (opType.contains('DELETE')) {
@@ -132,19 +135,23 @@ class ProtobufMapper {
                 ? 'DELETE_TASK'
                 : 'UPDATE_TASK', // Approximate, server handles actual type matching usually
             'data': taskToJson(t),
-            'timestamp':
-                t.lastUpdated.isNotEmpty ? t.lastUpdated : proto.timestamp,
-            'actorId':
-                t.lastUpdatedBy.isNotEmpty ? t.lastUpdatedBy : proto.actorId,
+            'timestamp': t.lastUpdated.isNotEmpty
+                ? t.lastUpdated
+                : proto.timestamp,
+            'actorId': t.lastUpdatedBy.isNotEmpty
+                ? t.lastUpdatedBy
+                : proto.actorId,
           });
         }
         for (final d in proto.batchUpdate.dependencies) {
           ops.add({
-            'type':
-                d.type == 'DELETE' ? 'DELETE_DEPENDENCY' : 'UPDATE_DEPENDENCY',
+            'type': d.type == 'DELETE'
+                ? 'DELETE_DEPENDENCY'
+                : 'UPDATE_DEPENDENCY',
             'data': dependencyToJson(d),
-            'timestamp':
-                d.lastUpdated.isNotEmpty ? d.lastUpdated : proto.timestamp,
+            'timestamp': d.lastUpdated.isNotEmpty
+                ? d.lastUpdated
+                : proto.timestamp,
             'actorId': proto.actorId,
           });
         }
@@ -152,8 +159,9 @@ class ProtobufMapper {
           ops.add({
             'type': r.isDeleted ? 'DELETE_RESOURCE' : 'UPDATE_RESOURCE',
             'data': resourceToJson(r),
-            'timestamp':
-                r.lastUpdated.isNotEmpty ? r.lastUpdated : proto.timestamp,
+            'timestamp': r.lastUpdated.isNotEmpty
+                ? r.lastUpdated
+                : proto.timestamp,
             'actorId': proto.actorId,
           });
         }
@@ -161,7 +169,7 @@ class ProtobufMapper {
         break;
       case ProtocolMessage_Payload.syncMetadata:
         json['data'] = {
-          'totalOperations': proto.syncMetadata.totalOperations.toInt()
+          'totalOperations': proto.syncMetadata.totalOperations.toInt(),
         };
         break;
       case ProtocolMessage_Payload.merkleRoot:
@@ -216,17 +224,20 @@ class ProtobufMapper {
       ..id = data['id']?.toString() ?? data['taskId']?.toString() ?? ''
       ..rowId = (data['rowId'] ?? data['row_id'])?.toString() ?? ''
       ..start = MerkleHashNormalizer.formatProtocolDate(
-          data['start'] ?? data['startDate'] ?? data['start_date'])
+        data['start'] ?? data['startDate'] ?? data['start_date'],
+      )
       ..end = MerkleHashNormalizer.formatProtocolDate(
         data['end'] ?? data['endDate'] ?? data['end_date'],
         fallback: DateTime.utc(1970, 1, 2).toIso8601String(),
       )
       ..name = data['name']?.toString() ?? ''
       ..completion = (data['completion'] as num?)?.toDouble() ?? 0.0
-      ..isSummary = data['isSummary'] == true ||
+      ..isSummary =
+          data['isSummary'] == true ||
           data['ganttType'] == 'summary' ||
           data['gantt_type'] == 'summary'
-      ..isMilestone = data['isMilestone'] == true ||
+      ..isMilestone =
+          data['isMilestone'] == true ||
           data['ganttType'] == 'milestone' ||
           data['gantt_type'] == 'milestone'
       ..resourceId = data['resourceId']?.toString() ?? ''

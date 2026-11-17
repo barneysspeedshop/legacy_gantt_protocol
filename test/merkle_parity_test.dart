@@ -41,10 +41,12 @@ ProtocolTask serverTaskHashProto(Map<String, dynamic> row) {
         : true,
     'propagatesMoveToChildren': row['propagates_move_to_children'] != false,
     'resizePolicy': row['resize_policy'],
-    'baselineStart':
-        MerkleHashNormalizer.formatProtocolDateOrNull(row['baseline_start']),
-    'baselineEnd':
-        MerkleHashNormalizer.formatProtocolDateOrNull(row['baseline_end']),
+    'baselineStart': MerkleHashNormalizer.formatProtocolDateOrNull(
+      row['baseline_start'],
+    ),
+    'baselineEnd': MerkleHashNormalizer.formatProtocolDateOrNull(
+      row['baseline_end'],
+    ),
   });
   pt.metadataJson = jsonEncode(metadata);
   return pt;
@@ -96,16 +98,24 @@ ProtocolTask clientStyleTaskProto({
     ..isSummary = false
     ..isMilestone = false
     ..isDeleted = false
-    ..lastUpdated =
-        Hlc.fromDate(DateTime.utc(2026, 6, 12, 6, 33), 'client').toString()
+    ..lastUpdated = Hlc.fromDate(
+      DateTime.utc(2026, 6, 12, 6, 33),
+      'client',
+    ).toString()
     ..metadataJson = jsonEncode(meta);
 }
 
 void main() {
   group('Merkle parity', () {
     test('task hash matches between server row and client protocol task', () {
-      final startMs =
-          DateTime.utc(2026, 5, 23, 5, 49, 12).millisecondsSinceEpoch;
+      final startMs = DateTime.utc(
+        2026,
+        5,
+        23,
+        5,
+        49,
+        12,
+      ).millisecondsSinceEpoch;
       final endMs = DateTime.utc(2026, 5, 24).millisecondsSinceEpoch;
 
       final serverRow = {
@@ -120,8 +130,10 @@ void main() {
         'resize_policy': '0',
         'propagates_move_to_children': 1,
         'uses_work_calendar': 0,
-        'last_updated':
-            Hlc.fromDate(DateTime.utc(2026, 6, 12, 6, 33), 'client').toString(),
+        'last_updated': Hlc.fromDate(
+          DateTime.utc(2026, 6, 12, 6, 33),
+          'client',
+        ).toString(),
       };
 
       final serverProto = serverTaskHashProto(serverRow);
@@ -134,7 +146,7 @@ void main() {
         segments: [
           {
             'start': '2026-01-01T00:00:00.000Z',
-            'end': '2026-01-02T00:00:00.000Z'
+            'end': '2026-01-02T00:00:00.000Z',
           },
         ],
       );
@@ -147,8 +159,10 @@ void main() {
         'predecessor_task_id': 'a',
         'successor_task_id': 'b',
         'dependency_type': 'startToStart',
-        'last_updated':
-            Hlc.fromDate(DateTime.utc(2026, 5, 19, 19, 4), 'x').toString(),
+        'last_updated': Hlc.fromDate(
+          DateTime.utc(2026, 5, 19, 19, 4),
+          'x',
+        ).toString(),
       };
 
       final serverProto = serverDependencyHashProto(row);
@@ -190,8 +204,14 @@ void main() {
     });
 
     test('millisecond epoch strings hash the same as UTC ISO dates', () {
-      final startMs =
-          DateTime.utc(2026, 5, 23, 5, 49, 12).millisecondsSinceEpoch;
+      final startMs = DateTime.utc(
+        2026,
+        5,
+        23,
+        5,
+        49,
+        12,
+      ).millisecondsSinceEpoch;
       final endMs = DateTime.utc(2026, 5, 24).millisecondsSinceEpoch;
       final baseRow = {
         'id': 'task-ms',
@@ -210,10 +230,14 @@ void main() {
       });
       final fromIso = serverTaskHashProto({
         ...baseRow,
-        'start_date': DateTime.fromMillisecondsSinceEpoch(startMs, isUtc: true)
-            .toIso8601String(),
-        'end_date': DateTime.fromMillisecondsSinceEpoch(endMs, isUtc: true)
-            .toIso8601String(),
+        'start_date': DateTime.fromMillisecondsSinceEpoch(
+          startMs,
+          isUtc: true,
+        ).toIso8601String(),
+        'end_date': DateTime.fromMillisecondsSinceEpoch(
+          endMs,
+          isUtc: true,
+        ).toIso8601String(),
       });
 
       expect(fromMillis.contentHash, fromIso.contentHash);
@@ -227,8 +251,9 @@ void main() {
         ..start = DateTime.utc(2026, 1, 1).toIso8601String()
         ..end = DateTime.utc(2026, 1, 2).toIso8601String()
         ..lastUpdated = hlc
-        ..metadataJson =
-            jsonEncode(MerkleHashNormalizer.normalizeTaskMetadata({}));
+        ..metadataJson = jsonEncode(
+          MerkleHashNormalizer.normalizeTaskMetadata({}),
+        );
       final tombstone = ProtocolTask()
         ..id = 'dead'
         ..rowId = 'r1'
@@ -236,8 +261,9 @@ void main() {
         ..end = DateTime.utc(2026, 1, 2).toIso8601String()
         ..isDeleted = true
         ..lastUpdated = hlc
-        ..metadataJson =
-            jsonEncode(MerkleHashNormalizer.normalizeTaskMetadata({}));
+        ..metadataJson = jsonEncode(
+          MerkleHashNormalizer.normalizeTaskMetadata({}),
+        );
 
       final withTombstone = CRDTEngine().computeMerkleTree([live, tombstone]);
       final withoutTombstone = CRDTEngine().computeMerkleTree([live]);
@@ -251,10 +277,9 @@ void main() {
         ..name = 'Crew A'
         ..type = 'job'
         ..metadataJson = jsonEncode(
-          MerkleHashNormalizer.normalizeResourceMetadata(
-            {'isExpanded': true},
-            type: 'job',
-          ),
+          MerkleHashNormalizer.normalizeResourceMetadata({
+            'isExpanded': true,
+          }, type: 'job'),
         );
 
       final clientProto = ProtocolResource()

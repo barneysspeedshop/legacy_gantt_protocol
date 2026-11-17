@@ -37,7 +37,9 @@ void main() {
 
       expect(result.length, 1);
       expect(
-          result.first.start, DateTime(2023, 1, 2).toUtc().toIso8601String());
+        result.first.start,
+        DateTime(2023, 1, 2).toUtc().toIso8601String(),
+      );
       expect(result.first.end, DateTime(2023, 1, 6).toUtc().toIso8601String());
       expect(result.first.name, 'Task 1 Updated');
       expect(result.first.lastUpdated, Hlc.fromIntTimestamp(100).toString());

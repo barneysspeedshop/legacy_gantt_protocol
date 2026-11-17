@@ -24,10 +24,14 @@ void main() {
 
       final result = engine.mergeTasks([], [op]);
       expect(result.length, 1);
-      expect(result.first.start,
-          equals(DateTime.utc(2025, 12, 26, 20).toIso8601String()));
-      expect(result.first.end,
-          equals(DateTime.utc(2025, 12, 27, 20).toIso8601String()));
+      expect(
+        result.first.start,
+        equals(DateTime.utc(2025, 12, 26, 20).toIso8601String()),
+      );
+      expect(
+        result.first.end,
+        equals(DateTime.utc(2025, 12, 27, 20).toIso8601String()),
+      );
     });
 
     test('should use defaults (not 0 duration) on parsing failure', () {
@@ -74,8 +78,10 @@ void main() {
 
         final result = engine.mergeTasks([], [op1, op2]);
         expect(result.length, 1);
-        expect(result.first.start,
-            equals(DateTime.utc(2025, 12, 26, 11).toIso8601String()));
+        expect(
+          result.first.start,
+          equals(DateTime.utc(2025, 12, 26, 11).toIso8601String()),
+        );
         expect(
           result.first.end,
           equals(DateTime.utc(2025, 12, 26, 12).toIso8601String()),

@@ -43,8 +43,9 @@ class MerkleHashNormalizer {
     normalized['propagatesMoveToChildren'] =
         normalized['propagatesMoveToChildren'] != false;
     normalized['isAutoScheduled'] = normalized['isAutoScheduled'] != false;
-    normalized['resizePolicy'] =
-        normalizeResizePolicy(normalized['resizePolicy']);
+    normalized['resizePolicy'] = normalizeResizePolicy(
+      normalized['resizePolicy'],
+    );
 
     // UI-only / non-persisted fields — excluded from sync integrity hash.
     normalized['segments'] = null;
@@ -53,10 +54,12 @@ class MerkleHashNormalizer {
     // Start/end are always serialized as UTC ISO strings in protocol fields.
     normalized['startIsUtc'] = true;
     normalized['endIsUtc'] = true;
-    normalized['baselineStartIsUtc'] =
-        normalized['baselineStart'] != null ? true : null;
-    normalized['baselineEndIsUtc'] =
-        normalized['baselineEnd'] != null ? true : null;
+    normalized['baselineStartIsUtc'] = normalized['baselineStart'] != null
+        ? true
+        : null;
+    normalized['baselineEndIsUtc'] = normalized['baselineEnd'] != null
+        ? true
+        : null;
 
     return normalized;
   }

@@ -16,7 +16,7 @@ const (
 type Operation struct {
 	Type          string          `json:"type"`
 	SchemaVersion int             `json:"schemaVersion,omitempty"` // Defaults to 1 if omitted
-	Timestamp     string          `json:"timestamp"` // HLC String
+	Timestamp     string          `json:"timestamp"`               // HLC String
 	ActorID       string          `json:"actorId"`
 	Data          json.RawMessage `json:"data"` // Flexible payload
 }
