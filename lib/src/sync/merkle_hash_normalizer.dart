@@ -17,16 +17,28 @@ class MerkleHashNormalizer {
     return asString;
   }
 
+  /// Canonical AARRGGBB; six-digit hex and 24-bit integers are opaque RGB.
   static String? normalizeColorHex(dynamic value) {
     if (value == null) return null;
-    if (value is String) {
-      if (value.startsWith('#')) return value.substring(1).toLowerCase();
-      final parsed = int.tryParse(value);
-      if (parsed != null) return parsed.toRadixString(16).padLeft(6, '0');
-      return value.toLowerCase();
+    int? packed;
+    var explicitAlpha = false;
+    if (value is int) {
+      packed = value;
+      explicitAlpha = value < 0 || value > 0xffffff;
+    } else if (value is String) {
+      final hex = value.startsWith('#') ? value.substring(1) : value;
+      if (hex.length == 6 || hex.length == 8 || value.startsWith('#')) {
+        packed = int.tryParse(hex, radix: 16);
+        explicitAlpha = hex.length == 8;
+      } else {
+        // Older databases stored integer colors as decimal TEXT.
+        packed = int.tryParse(hex) ?? int.tryParse(hex, radix: 16);
+        explicitAlpha = packed != null && (packed < 0 || packed > 0xffffff);
+      }
     }
-    if (value is int) return value.toRadixString(16).padLeft(6, '0');
-    return value.toString();
+    if (packed == null) return value.toString().toLowerCase();
+    final argb = explicitAlpha ? packed & 0xffffffff : packed | 0xff000000;
+    return argb.toRadixString(16).padLeft(8, '0');
   }
 
   static Map<String, dynamic> normalizeTaskMetadata(Map<String, dynamic> meta) {

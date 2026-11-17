@@ -1,6 +1,7 @@
 ## 3.0.0
 
 * **BREAKING**: Export generated Protobuf models and use binary production WebSocket frames. Dates and HLC model fields are strings; dependency lag uses Int64 and metadata uses metadataJson.
+* Canonicalize RGB and ARGB colors for consistent hashes while preserving alpha. Six- and eight-digit strings are hexadecimal; other numeric strings retain legacy decimal support.
 * Add the shared ProtobufMapper and preserve batch deletion markers and per-record clocks.
 * Require Dart 3.8 or newer. Deploy production clients and server together; the Go JSON mock remains a separate test transport.
 
