@@ -94,4 +94,80 @@ void main() {
       ),
     );
   });
+  test('task tombstones reject older and equal-clock live updates', () {
+    final tombstone = ProtobufMapper.taskFromJson({
+      'id': 'deleted',
+      'name': 'Deleted',
+      'isDeleted': true,
+      'lastUpdated': clock.toString(),
+      'metadataJson': '{"color":42}',
+    });
+    for (final type in ['INSERT_TASK', 'UPDATE_TASK']) {
+      for (final millis in [1000, 2000]) {
+        final merged = engine.mergeTasks(
+          [tombstone],
+          [
+            wireOperation(type, {
+              'id': 'deleted',
+              'name': 'Stale',
+              'color': 99,
+            }, Hlc.fromIntTimestamp(millis)),
+          ],
+        );
+        expect(merged.single.isDeleted, isTrue, reason: '$type at $millis');
+        expect(merged.single.contentHash, tombstone.contentHash);
+        expect(merged.single.lastUpdated, clock.toString());
+      }
+    }
+    final restored = engine.mergeTasks(
+      [tombstone],
+      [
+        wireOperation('UPDATE_TASK', {
+          'id': 'deleted',
+          'name': 'Restored',
+        }, Hlc.fromIntTimestamp(3000)),
+      ],
+    );
+    expect(restored.single.isDeleted, isFalse);
+    expect(restored.single.name, 'Restored');
+  });
+
+  test('resource tombstones reject older and equal-clock live updates', () {
+    final tombstone = ProtobufMapper.resourceFromJson({
+      'id': 'deleted',
+      'name': 'Deleted',
+      'type': 'person',
+      'isDeleted': true,
+      'lastUpdated': clock.toString(),
+      'metadataJson': '{"sortOrder":2}',
+    });
+    for (final type in ['INSERT_RESOURCE', 'UPDATE_RESOURCE']) {
+      for (final millis in [1000, 2000]) {
+        final merged = engine.mergeResources(
+          [tombstone],
+          [
+            wireOperation(type, {
+              'id': 'deleted',
+              'name': 'Stale',
+              'sortOrder': 99,
+            }, Hlc.fromIntTimestamp(millis)),
+          ],
+        );
+        expect(merged.single.isDeleted, isTrue, reason: '$type at $millis');
+        expect(merged.single.contentHash, tombstone.contentHash);
+        expect(merged.single.lastUpdated, clock.toString());
+      }
+    }
+    final restored = engine.mergeResources(
+      [tombstone],
+      [
+        wireOperation('UPDATE_RESOURCE', {
+          'id': 'deleted',
+          'name': 'Restored',
+        }, Hlc.fromIntTimestamp(3000)),
+      ],
+    );
+    expect(restored.single.isDeleted, isFalse);
+    expect(restored.single.name, 'Restored');
+  });
 }

@@ -98,6 +98,13 @@ class CRDTEngine {
     if (resourceId == null) return;
 
     final existing = resourceMap[resourceId];
+    if (existing != null &&
+        existing.isDeleted &&
+        op.type != 'DELETE_RESOURCE' &&
+        effectiveData['isDeleted'] != true &&
+        op.timestamp <= existing.parsedLastUpdated) {
+      return;
+    }
     // If not exists, create new
     final base =
         existing ??
@@ -195,6 +202,12 @@ class CRDTEngine {
     if (taskId == null) return;
 
     final existing = taskMap[taskId];
+    if (existing != null &&
+        existing.isDeleted &&
+        effectiveData['isDeleted'] != true &&
+        op.timestamp <= existing.parsedLastUpdated) {
+      return;
+    }
 
     // For INSERT/UPDATE, we assume isDeleted=false (Resurrection)
     final base =

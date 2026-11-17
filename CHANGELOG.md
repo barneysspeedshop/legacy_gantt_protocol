@@ -1,3 +1,7 @@
+## 3.0.1
+
+* Reject task and resource resurrection at or before their deletion clock. Preserve tombstone content during stale retries; strictly newer edits can still restore deleted entities.
+
 ## 3.0.0
 
 * **BREAKING**: CRDT task and resource merge results retain tombstones. Filter deleted records for UI projections while retaining the full state for future merges and Merkle checks.
