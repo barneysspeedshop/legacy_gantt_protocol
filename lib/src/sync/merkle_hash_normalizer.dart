@@ -42,8 +42,12 @@ class MerkleHashNormalizer {
   }
 
   static Map<String, dynamic> normalizeTaskMetadata(Map<String, dynamic> meta) {
-    final normalized = Map<String, dynamic>.from(meta);
-
+    final normalized = <String, dynamic>{
+      'originalId': null,
+      'baselineStart': null,
+      'baselineEnd': null,
+      ...meta,
+    };
     normalized['color'] = normalizeColorHex(normalized['color']);
     normalized['textColor'] = normalizeColorHex(normalized['textColor']);
     normalized['stackIndex'] = (normalized['stackIndex'] as num?)?.toInt() ?? 0;

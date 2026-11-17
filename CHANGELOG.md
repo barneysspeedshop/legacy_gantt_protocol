@@ -1,7 +1,11 @@
 ## 3.0.0
 
+* **BREAKING**: CRDT task and resource merge results retain tombstones. Filter deleted records for UI projections while retaining the full state for future merges and Merkle checks.
+
 * **BREAKING**: Export generated Protobuf models and use binary production WebSocket frames. Dates and HLC model fields are strings; dependency lag uses Int64 and metadata uses metadataJson.
 * Canonicalize RGB and ARGB colors for consistent hashes while preserving alpha. Six- and eight-digit strings are hexadecimal; other numeric strings retain legacy decimal support.
+* Hash semantic scalar values and canonical metadata defaults independently of Protobuf field presence.
+* Retain flat and nested resource metadata through binary serialization.
 * Add the shared ProtobufMapper and preserve batch deletion markers and per-record clocks.
 * Require Dart 3.8 or newer. Deploy production clients and server together; the Go JSON mock remains a separate test transport.
 

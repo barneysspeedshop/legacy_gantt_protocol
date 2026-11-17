@@ -120,20 +120,11 @@ void main() {
 
       // Apply Delete
       var result = engine.mergeTasks([baseTask], [opDelete]);
-      expect(
-        result,
-        isEmpty,
-      ); // Hidden from UI (logic might return tombstone or filter it? Engine usually returns all, including deleted if not filtered)
-      // Wait, mergeTasks filters deleted?
-      // CRDTEngine description: "Returns the filtered list of visible tasks." (Usually)
-      // Let's assume it DOES filter. If so, result is empty.
+      expect(result, hasLength(1));
+      expect(result.single.isDeleted, isTrue);
 
-      // Apply Update (Resurrect) - Need to pass tombstone.
-      // Recreate tombstone
-      final tombstone = baseTask.deepCopy()
-        ..isDeleted = true
-        ..fieldTimestamps.addAll({'isDeleted': hlcDelete.toString()});
-      result = engine.mergeTasks([tombstone], [opUpdate]);
+      // Use the retained tombstone so older edits cannot silently resurrect it.
+      result = engine.mergeTasks(result, [opUpdate]);
 
       expect(result, hasLength(1));
       expect(result.first.name, 'Resurrected');

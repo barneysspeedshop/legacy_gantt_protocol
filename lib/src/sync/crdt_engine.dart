@@ -1,5 +1,6 @@
 import 'dart:convert';
 import '../models/operation.dart';
+import '../models/protobuf_mapper.dart';
 import '../generated/gantt_protocol.pb.dart';
 import '../models/protocol_extensions.dart';
 import '../models/protocol_tag.dart';
@@ -16,6 +17,7 @@ class CRDTEngine {
   /// Uses "Hybrid Sovereignty" logic:
   /// - Field-Level LWW (Map-CRDT) for properties.
   /// - Add-Wins OR-Set (Tombstones) for existence.
+  /// Returns tombstones as state; UI callers must filter [ProtocolTask.isDeleted].
   List<ProtocolTask> mergeTasks(
     List<ProtocolTask> currentTasks,
     List<Operation> operations,
@@ -41,11 +43,11 @@ class CRDTEngine {
       }
     }
 
-    // 3. Return only non-deleted tasks (Tombstones are filtered out for UI)
-    return taskMap.values.where((t) => !t.isDeleted).toList();
+    // Retain tombstones for subsequent merges and Merkle reconciliation.
+    return taskMap.values.toList();
   }
 
-  /// Merges a list of resources with a list of operations.
+  /// Merges resources, retaining tombstones for later merges and integrity checks.
   List<ProtocolResource> mergeResources(
     List<ProtocolResource> currentResources,
     List<Operation> operations,
@@ -71,27 +73,20 @@ class CRDTEngine {
       }
     }
 
-    // 3. Return non-deleted resources
-    return resourceMap.values.where((r) => !r.isDeleted).toList();
+    return resourceMap.values.toList();
   }
 
   void _applyResourceOp(
     Map<String, ProtocolResource> resourceMap,
     Operation op,
   ) {
-    if (op.type == 'DELETE_RESOURCE') {
-      final resourceId =
-          op.data['id'] as String? ?? op.data['resourceId'] as String?;
-      if (resourceId == null) return;
-
-      final existing = resourceMap[resourceId];
-      if (existing != null) {
-        resourceMap[resourceId] = existing.deepCopy()..isDeleted = true;
-      }
+    if (!const {
+      'DELETE_RESOURCE',
+      'INSERT_RESOURCE',
+      'UPDATE_RESOURCE',
+    }.contains(op.type)) {
       return;
     }
-
-    if (op.type != 'INSERT_RESOURCE' && op.type != 'UPDATE_RESOURCE') return;
 
     final opData = op.data;
     var effectiveData = opData;
@@ -112,7 +107,11 @@ class CRDTEngine {
           ..isDeleted = true
           ..lastUpdated = Hlc.zero.toString());
 
-    resourceMap[resourceId] = _mergeResource(base, op, effectiveData);
+    resourceMap[resourceId] = _mergeResource(base, op, {
+      ...effectiveData,
+      'isDeleted':
+          op.type == 'DELETE_RESOURCE' || effectiveData['isDeleted'] == true,
+    });
   }
 
   ProtocolResource _mergeResource(
@@ -120,6 +119,8 @@ class CRDTEngine {
     Operation op,
     Map<String, dynamic> changes,
   ) {
+    if (op.timestamp < target.parsedLastUpdated) return target;
+
     String newName = target.name;
     if (changes.containsKey('name')) newName = changes['name'];
 
@@ -127,8 +128,8 @@ class CRDTEngine {
     if (changes.containsKey('parentId')) newParentId = changes['parentId'];
 
     String newType = target.type;
-    if (changes.containsKey('ganttType')) {
-      newType = changes['ganttType']; // Map legacy ganttType to type
+    if (changes.containsKey('type') || changes.containsKey('ganttType')) {
+      newType = changes['type'] ?? changes['ganttType'];
     }
 
     // Metadata merging
@@ -141,19 +142,7 @@ class CRDTEngine {
     }
 
     final Map<String, dynamic> newMetadata = Map.from(currentMetadata);
-    changes.forEach((key, value) {
-      if (![
-        'id',
-        'name',
-        'parentId',
-        'ganttType',
-        'isDeleted',
-        'data',
-        'lastUpdated',
-      ].contains(key)) {
-        newMetadata[key] = value;
-      }
-    });
+    newMetadata.addAll(ProtobufMapper.metadataFromJson(changes));
 
     // Implicit resurrection
     final maxHlc = op.timestamp > target.parsedLastUpdated
@@ -164,7 +153,7 @@ class CRDTEngine {
       ..name = newName
       ..parentId = newParentId ?? ''
       ..type = newType
-      ..isDeleted = false
+      ..isDeleted = changes['isDeleted'] == true
       ..metadataJson = jsonEncode(newMetadata)
       ..lastUpdated = maxHlc.toString();
   }
@@ -187,7 +176,11 @@ class CRDTEngine {
             ..lastUpdated = Hlc.zero.toString()
             ..isDeleted = true); // minimally valid tombstone
 
-      taskMap[taskId] = _mergeTask(base, op, {'isDeleted': true});
+      taskMap[taskId] = _mergeTask(base, op, {...op.data, 'isDeleted': true});
+      return;
+    }
+
+    if (!const {'INSERT_TASK', 'UPDATE_TASK', 'UPDATE'}.contains(op.type)) {
       return;
     }
 
@@ -216,7 +209,7 @@ class CRDTEngine {
 
     // Inject isDeleted=false into the data to force resurrection check
     final mergeData = Map<String, dynamic>.from(effectiveData);
-    mergeData['isDeleted'] = false;
+    mergeData['isDeleted'] = effectiveData['isDeleted'] == true;
 
     taskMap[taskId] = _mergeTask(base, op, mergeData);
   }
@@ -321,19 +314,22 @@ class CRDTEngine {
     }
 
     bool newIsSummary = target.isSummary;
-    if (changes.containsKey('isSummary')) {
+    final ganttType = changes['ganttType'] ?? changes['gantt_type'];
+    if (changes.containsKey('isSummary') || ganttType != null) {
       newIsSummary = update(
         'isSummary',
-        changes['isSummary'] == true,
+        changes['isSummary'] == true ||
+            ganttType == 'summary' ||
+            ganttType == 'project',
         target.isSummary,
       );
     }
 
     bool newIsMilestone = target.isMilestone;
-    if (changes.containsKey('isMilestone')) {
+    if (changes.containsKey('isMilestone') || ganttType != null) {
       newIsMilestone = update(
         'isMilestone',
-        changes['isMilestone'] == true,
+        changes['isMilestone'] == true || ganttType == 'milestone',
         target.isMilestone,
       );
     }
@@ -349,38 +345,10 @@ class CRDTEngine {
 
     Map<String, dynamic> newMetadata = Map.from(currentMetadata);
 
-    final managedFields = [
-      'id',
-      'taskId',
-      'rowId',
-      'start',
-      'startDate',
-      'start_date',
-      'end',
-      'endDate',
-      'end_date',
-      'name',
-      'completion',
-      'resourceId',
-      'parentId',
-      'notes',
-      'isSummary',
-      'isMilestone',
-      'isDeleted',
-      'data',
-      'timestamp',
-      'actorId',
-      'fieldTimestamps',
-      'lastUpdated',
-      'lastUpdatedBy',
-    ];
-
-    changes.forEach((key, value) {
-      if (!managedFields.contains(key)) {
-        if (shouldUpdate(key)) {
-          newMetadata[key] = value;
-          newTimestamps[key] = op.timestamp.toString();
-        }
+    ProtobufMapper.metadataFromJson(changes).forEach((key, value) {
+      if (shouldUpdate(key)) {
+        newMetadata[key] = value;
+        newTimestamps[key] = op.timestamp.toString();
       }
     });
 

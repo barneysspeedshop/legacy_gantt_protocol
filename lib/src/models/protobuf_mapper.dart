@@ -267,13 +267,19 @@ class ProtobufMapper {
   }
 
   static ProtocolResource resourceFromJson(Map<String, dynamic> data) {
+    if (data['data'] is Map<String, dynamic>) {
+      data = {...data, ...data['data'] as Map<String, dynamic>}..remove('data');
+    }
     return ProtocolResource()
       ..id = data['id']?.toString() ?? ''
       ..name = data['name']?.toString() ?? ''
       ..parentId = data['parentId']?.toString() ?? ''
       ..isDeleted = data['isDeleted'] == true || data['is_deleted'] == true
-      ..type = (data['type'] ?? data['ganttType'])?.toString() ?? 'person'
-      ..metadataJson = data['metadataJson']?.toString() ?? ''
+      ..type =
+          (data['type'] ?? data['ganttType'] ?? data['gantt_type'])
+              ?.toString() ??
+          'person'
+      ..metadataJson = jsonEncode(metadataFromJson(data))
       ..lastUpdated = data['lastUpdated']?.toString() ?? '';
   }
 
