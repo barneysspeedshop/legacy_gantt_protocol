@@ -1,3 +1,9 @@
+## 3.0.0
+
+* **BREAKING**: Export generated Protobuf models and use binary production WebSocket frames. Dates and HLC model fields are strings; dependency lag uses Int64 and metadata uses metadataJson.
+* Add the shared ProtobufMapper and preserve batch deletion markers and per-record clocks.
+* Require Dart 3.8 or newer. Deploy production clients and server together; the Go JSON mock remains a separate test transport.
+
 ## 2.1.0
 
 *   **FEAT**: Increased Merkle tree granularity to **Minute-level** (16-character bucket prefixes) for more precise data reconciliation.

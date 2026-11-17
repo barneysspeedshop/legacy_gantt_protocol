@@ -18,15 +18,14 @@ void main() {
       const hlcA = Hlc(millis: 2000, counter: 0, nodeId: 'A');
       const hlcB = Hlc(millis: 2000, counter: 0, nodeId: 'B');
 
-      final baseTask = ProtocolTask(
-        id: '1',
-        rowId: 'r1',
-        start: DateTime(2023, 1, 1),
-        end: DateTime(2023, 1, 2),
-        name: 'Original Name',
-        notes: 'Original Notes',
-        lastUpdated: Hlc.zero,
-      );
+      final baseTask = ProtocolTask()
+        ..id = '1'
+        ..rowId = 'r1'
+        ..start = DateTime(2023, 1, 1).toIso8601String()
+        ..end = DateTime(2023, 1, 2).toIso8601String()
+        ..name = 'Original Name'
+        ..notes = 'Original Notes'
+        ..lastUpdated = Hlc.zero.toString();
 
       // Op A: Updates Name
       final opA = Operation(
@@ -63,14 +62,13 @@ void main() {
       const hlc1 = Hlc(millis: 1000, counter: 0, nodeId: 'A');
       const hlc2 = Hlc(millis: 2000, counter: 0, nodeId: 'B');
 
-      final baseTask = ProtocolTask(
-        id: '1',
-        rowId: 'r1',
-        start: DateTime.now(),
-        end: DateTime.now(),
-        name: 'Old',
-        lastUpdated: Hlc.zero,
-      );
+      final baseTask = ProtocolTask()
+        ..id = '1'
+        ..rowId = 'r1'
+        ..start = DateTime.now().toIso8601String()
+        ..end = DateTime.now().toIso8601String()
+        ..name = 'Old'
+        ..lastUpdated = Hlc.zero.toString();
 
       // Op 1 (Newer): Set Name to New
       final op1 = Operation(
@@ -96,14 +94,13 @@ void main() {
       const hlcDelete = Hlc(millis: 1000, counter: 0, nodeId: 'A');
       const hlcUpdate = Hlc(millis: 2000, counter: 0, nodeId: 'B');
 
-      final baseTask = ProtocolTask(
-        id: '1',
-        rowId: 'r1',
-        start: DateTime.now(),
-        end: DateTime.now(),
-        name: 'Alive',
-        lastUpdated: Hlc.zero,
-      );
+      final baseTask = ProtocolTask()
+        ..id = '1'
+        ..rowId = 'r1'
+        ..start = DateTime.now().toIso8601String()
+        ..end = DateTime.now().toIso8601String()
+        ..name = 'Alive'
+        ..lastUpdated = Hlc.zero.toString();
 
       // Op 1: Delete
       final opDelete = Operation(
@@ -133,10 +130,9 @@ void main() {
 
       // Apply Update (Resurrect) - Need to pass tombstone.
       // Recreate tombstone
-      final tombstone = baseTask.copyWith(
-        isDeleted: true,
-        fieldTimestamps: {'isDeleted': hlcDelete},
-      );
+      final tombstone = baseTask.deepCopy()
+        ..isDeleted = true
+        ..fieldTimestamps.addAll({'isDeleted': hlcDelete.toString()});
       result = engine.mergeTasks([tombstone], [opUpdate]);
 
       expect(result, hasLength(1));

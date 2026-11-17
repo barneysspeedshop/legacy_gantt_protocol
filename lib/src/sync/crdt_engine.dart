@@ -1,9 +1,10 @@
+import 'dart:convert';
 import '../models/operation.dart';
-import '../models/protocol_task.dart';
-import '../models/protocol_dependency.dart';
-import '../models/protocol_resource.dart';
+import '../generated/gantt_protocol.pb.dart';
+import '../models/protocol_extensions.dart';
 import '../models/protocol_tag.dart';
 import 'merkle_tree.dart';
+import 'merkle_hash_normalizer.dart';
 import 'hlc.dart';
 
 /// The core engine for Conflict-Free Replicated Data Types (CRDT) logic.
@@ -85,7 +86,7 @@ class CRDTEngine {
 
       final existing = resourceMap[resourceId];
       if (existing != null) {
-        resourceMap[resourceId] = existing.copyWith(isDeleted: true);
+        resourceMap[resourceId] = existing.deepCopy()..isDeleted = true;
       }
       return;
     }
@@ -103,13 +104,13 @@ class CRDTEngine {
 
     final existing = resourceMap[resourceId];
     // If not exists, create new
-    final base = existing ??
-        ProtocolResource(
-          id: resourceId,
-          name: '',
-          isDeleted: true, // will be resurrected
-          lastUpdated: Hlc.zero,
-        );
+    final base =
+        existing ??
+        (ProtocolResource()
+          ..id = resourceId
+          ..name = ''
+          ..isDeleted = true
+          ..lastUpdated = Hlc.zero.toString());
 
     resourceMap[resourceId] = _mergeResource(base, op, effectiveData);
   }
@@ -131,7 +132,15 @@ class CRDTEngine {
     }
 
     // Metadata merging
-    final Map<String, dynamic> newMetadata = Map.from(target.metadata);
+    Map<String, dynamic> currentMetadata = {};
+    if (target.hasMetadataJson() && target.metadataJson.isNotEmpty) {
+      try {
+        currentMetadata =
+            jsonDecode(target.metadataJson) as Map<String, dynamic>;
+      } catch (_) {}
+    }
+
+    final Map<String, dynamic> newMetadata = Map.from(currentMetadata);
     changes.forEach((key, value) {
       if (![
         'id',
@@ -147,16 +156,17 @@ class CRDTEngine {
     });
 
     // Implicit resurrection
-    return target.copyWith(
-      name: newName,
-      parentId: newParentId,
-      type: newType,
-      isDeleted: false,
-      metadata: newMetadata,
-      lastUpdated: op.timestamp > (target.lastUpdated ?? Hlc.zero)
-          ? op.timestamp
-          : target.lastUpdated,
-    );
+    final maxHlc = op.timestamp > target.parsedLastUpdated
+        ? op.timestamp
+        : target.parsedLastUpdated;
+
+    return target.deepCopy()
+      ..name = newName
+      ..parentId = newParentId ?? ''
+      ..type = newType
+      ..isDeleted = false
+      ..metadataJson = jsonEncode(newMetadata)
+      ..lastUpdated = maxHlc.toString();
   }
 
   void _applyOp(Map<String, ProtocolTask> taskMap, Operation op) {
@@ -167,15 +177,15 @@ class CRDTEngine {
       final existing = taskMap[taskId];
 
       // Basic tombstone creation
-      final base = existing ??
-          ProtocolTask(
-            id: taskId,
-            rowId: '',
-            start: DateTime.utc(0),
-            end: DateTime.utc(0),
-            lastUpdated: Hlc.zero,
-            isDeleted: true,
-          ); // minimally valid tombstone
+      final base =
+          existing ??
+          (ProtocolTask()
+            ..id = taskId
+            ..rowId = ''
+            ..start = DateTime.utc(0).toIso8601String()
+            ..end = DateTime.utc(0).toIso8601String()
+            ..lastUpdated = Hlc.zero.toString()
+            ..isDeleted = true); // minimally valid tombstone
 
       taskMap[taskId] = _mergeTask(base, op, {'isDeleted': true});
       return;
@@ -194,15 +204,15 @@ class CRDTEngine {
     final existing = taskMap[taskId];
 
     // For INSERT/UPDATE, we assume isDeleted=false (Resurrection)
-    final base = existing ??
-        ProtocolTask(
-          id: taskId,
-          rowId: '',
-          start: DateTime.utc(1970, 1, 1),
-          end: DateTime.utc(1970, 1, 2),
-          lastUpdated: Hlc.zero,
-          isDeleted: true,
-        );
+    final base =
+        existing ??
+        (ProtocolTask()
+          ..id = taskId
+          ..rowId = ''
+          ..start = DateTime.utc(1970, 1, 1).toIso8601String()
+          ..end = DateTime.utc(1970, 1, 2).toIso8601String()
+          ..lastUpdated = Hlc.zero.toString()
+          ..isDeleted = true);
 
     // Inject isDeleted=false into the data to force resurrection check
     final mergeData = Map<String, dynamic>.from(effectiveData);
@@ -216,18 +226,19 @@ class CRDTEngine {
     Operation op,
     Map<String, dynamic> changes,
   ) {
-    final newTimestamps = Map<String, Hlc>.from(target.fieldTimestamps);
+    final newTimestamps = Map<String, String>.from(target.fieldTimestamps);
 
     // Helper to check LWW per field
     bool shouldUpdate(String field) {
-      final lastHlc = newTimestamps[field] ?? target.lastUpdated;
+      final lastHlcStr = newTimestamps[field] ?? target.lastUpdated;
+      final lastHlc = lastHlcStr.isNotEmpty ? Hlc.parse(lastHlcStr) : Hlc.zero;
       return op.timestamp >= lastHlc;
     }
 
     // Helper to update field
     T update<T>(String field, T candidate, T current) {
       if (shouldUpdate(field)) {
-        newTimestamps[field] = op.timestamp;
+        newTimestamps[field] = op.timestamp.toString();
         return candidate;
       }
       return current;
@@ -249,22 +260,30 @@ class CRDTEngine {
       newRowId = update('rowId', changes['rowId'], target.rowId);
     }
 
-    DateTime newStart = target.start;
+    String newStart = target.start;
     final startVal =
         changes['start'] ?? changes['startDate'] ?? changes['start_date'];
     if (startVal != null) {
       final parsed = _parseDate(startVal);
-      if (parsed != null) newStart = update('start', parsed, target.start);
+      if (parsed != null) {
+        newStart = update(
+          'start',
+          parsed.toUtc().toIso8601String(),
+          target.start,
+        );
+      }
     }
 
-    DateTime newEnd = target.end;
+    String newEnd = target.end;
     final endVal = changes['end'] ?? changes['endDate'] ?? changes['end_date'];
     if (endVal != null) {
       final parsed = _parseDate(endVal);
-      if (parsed != null) newEnd = update('end', parsed, target.end);
+      if (parsed != null) {
+        newEnd = update('end', parsed.toUtc().toIso8601String(), target.end);
+      }
     }
 
-    String? newName = target.name;
+    String newName = target.name;
     if (changes.containsKey('name')) {
       newName = update('name', changes['name'], target.name);
     }
@@ -278,23 +297,27 @@ class CRDTEngine {
       );
     }
 
-    String? newResourceId = target.resourceId;
+    String newResourceId = target.resourceId;
     if (changes.containsKey('resourceId')) {
       newResourceId = update(
         'resourceId',
-        changes['resourceId'],
+        changes['resourceId'] ?? '',
         target.resourceId,
       );
     }
 
-    String? newParentId = target.parentId;
+    String newParentId = target.parentId;
     if (changes.containsKey('parentId')) {
-      newParentId = update('parentId', changes['parentId'], target.parentId);
+      newParentId = update(
+        'parentId',
+        changes['parentId'] ?? '',
+        target.parentId,
+      );
     }
 
-    String? newNotes = target.notes;
+    String newNotes = target.notes;
     if (changes.containsKey('notes')) {
-      newNotes = update('notes', changes['notes'], target.notes);
+      newNotes = update('notes', changes['notes'] ?? '', target.notes);
     }
 
     bool newIsSummary = target.isSummary;
@@ -316,10 +339,16 @@ class CRDTEngine {
     }
 
     // Metadata Merging (Generalized LWW)
-    // Any field not explicitly handled above goes into metadata
-    Map<String, dynamic> newMetadata = Map.from(target.metadata);
+    Map<String, dynamic> currentMetadata = {};
+    if (target.hasMetadataJson() && target.metadataJson.isNotEmpty) {
+      try {
+        currentMetadata =
+            jsonDecode(target.metadataJson) as Map<String, dynamic>;
+      } catch (_) {}
+    }
 
-    // Also catch-all for any other keys in 'changes' that aren't managed above
+    Map<String, dynamic> newMetadata = Map.from(currentMetadata);
+
     final managedFields = [
       'id',
       'taskId',
@@ -348,35 +377,37 @@ class CRDTEngine {
 
     changes.forEach((key, value) {
       if (!managedFields.contains(key)) {
-        // It's a metadata candidate.
-        // Check timestamp for this specific metadata key?
-        // Yes, we should treat metadata keys as fields for LWW if possible.
         if (shouldUpdate(key)) {
           newMetadata[key] = value;
-          newTimestamps[key] = op.timestamp;
+          newTimestamps[key] = op.timestamp.toString();
         }
       }
     });
 
-    return target.copyWith(
-      rowId: newRowId,
-      start: newStart,
-      end: newEnd,
-      name: newName,
-      completion: newCompletion,
-      resourceId: newResourceId,
-      parentId: newParentId,
-      notes: newNotes,
-      isSummary: newIsSummary,
-      isMilestone: newIsMilestone,
-      fieldTimestamps: newTimestamps,
-      isDeleted: newIsDeleted,
-      lastUpdated:
-          op.timestamp > target.lastUpdated ? op.timestamp : target.lastUpdated,
-      lastUpdatedBy:
-          op.timestamp > target.lastUpdated ? op.actorId : target.lastUpdatedBy,
-      metadata: newMetadata,
-    );
+    final maxHlc = op.timestamp > target.parsedLastUpdated
+        ? op.timestamp
+        : target.parsedLastUpdated;
+    final maxActor = op.timestamp > target.parsedLastUpdated
+        ? op.actorId
+        : target.lastUpdatedBy;
+
+    return target.deepCopy()
+      ..rowId = newRowId
+      ..start = newStart
+      ..end = newEnd
+      ..name = newName
+      ..completion = newCompletion
+      ..resourceId = newResourceId
+      ..parentId = newParentId
+      ..notes = newNotes
+      ..isSummary = newIsSummary
+      ..isMilestone = newIsMilestone
+      ..fieldTimestamps.clear()
+      ..fieldTimestamps.addAll(newTimestamps)
+      ..isDeleted = newIsDeleted
+      ..lastUpdated = maxHlc.toString()
+      ..lastUpdatedBy = maxActor
+      ..metadataJson = jsonEncode(newMetadata);
   }
 
   DateTime? _parseDate(dynamic value) {
@@ -401,15 +432,34 @@ class CRDTEngine {
     final List<MapEntry<String, String>> items = [];
 
     for (final t in tasks) {
-      items.add(MapEntry(t.lastUpdated.toString(), t.contentHash));
+      items.add(
+        MapEntry(
+          MerkleHashNormalizer.merkleHlcKey(
+            t.hasLastUpdated() ? t.lastUpdated : '',
+          ),
+          t.contentHash,
+        ),
+      );
     }
     for (final d in dependencies) {
-      final hlc = d.lastUpdated ?? Hlc.zero;
-      items.add(MapEntry(hlc.toString(), d.contentHash));
+      items.add(
+        MapEntry(
+          MerkleHashNormalizer.merkleHlcKey(
+            d.hasLastUpdated() ? d.lastUpdated : '',
+          ),
+          d.contentHash,
+        ),
+      );
     }
     for (final r in resources) {
-      final hlc = r.lastUpdated ?? Hlc.zero;
-      items.add(MapEntry(hlc.toString(), r.contentHash));
+      items.add(
+        MapEntry(
+          MerkleHashNormalizer.merkleHlcKey(
+            r.hasLastUpdated() ? r.lastUpdated : '',
+          ),
+          r.contentHash,
+        ),
+      );
     }
 
     return MerkleTree.build(items);
@@ -421,8 +471,11 @@ class CRDTEngine {
     List<ProtocolDependency> dependencies = const [],
     List<ProtocolResource> resources = const [],
   }) {
-    final tree = computeMerkleTree(tasks,
-        dependencies: dependencies, resources: resources);
+    final tree = computeMerkleTree(
+      tasks,
+      dependencies: dependencies,
+      resources: resources,
+    );
     return tree.root.hash;
   }
 

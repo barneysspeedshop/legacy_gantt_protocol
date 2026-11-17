@@ -6,6 +6,16 @@ While this specific package (`legacy_gantt_protocol`) serves as the reference im
 
 ---
 
+## Production transport
+
+The production Dart server and Flutter client use binary WebSocket frames defined by [`proto/gantt_protocol.proto`](proto/gantt_protocol.proto). JSON operation examples describe decoded logical data. `ProtobufMapper` is the shared encoding boundary for both ends; it preserves metadata, HLCs, and deletion markers. The minimal Go reference server uses JSON text frames for logical protocol testing. See [the transport specification](SPEC.md#5-transport-protocol-websocket).
+
+## Version 3 migration
+
+Version 3 requires Dart 3.8 or newer and exposes generated Protobuf models. Task dates and model HLC fields are strings; dependency lag uses `Int64`, and metadata is stored in `metadataJson`. Use `parsedLastUpdated` for an `Hlc` value. Encode logical operation maps with `ProtobufMapper.toProtobuf(...).writeToBuffer()` and decode binary frames with `ProtocolMessage.fromBuffer(...)` and `ProtobufMapper.toJson(...)`.
+
+Upgrade the production server and clients together. The production transport does not accept JSON text frames. The chart 9.x and PERT 0.2.x releases use this protocol version. The Rust backend scheduler is experimental and returns an explicit unsupported error; protocol availability does not imply schedule optimization support.
+
 ## Why Gantt-Sync?
 
 Project management data is inherently complex and hierarchical. Traditional "Last-Write-Wins" strategies at a row level destroy user intent ("The Git of Project Management"). Gantt-Sync solves this by treating every field change as a causal event.

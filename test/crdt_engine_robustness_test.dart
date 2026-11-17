@@ -24,8 +24,10 @@ void main() {
 
       final result = engine.mergeTasks([], [op]);
       expect(result.length, 1);
-      expect(result.first.start, equals(DateTime.utc(2025, 12, 26, 20)));
-      expect(result.first.end, equals(DateTime.utc(2025, 12, 27, 20)));
+      expect(result.first.start,
+          equals(DateTime.utc(2025, 12, 26, 20).toIso8601String()));
+      expect(result.first.end,
+          equals(DateTime.utc(2025, 12, 27, 20).toIso8601String()));
     });
 
     test('should use defaults (not 0 duration) on parsing failure', () {
@@ -41,10 +43,10 @@ void main() {
       final task = result.first;
 
       // Should NOT be 0 duration
-      expect(task.end.isAfter(task.start), isTrue);
-      // Default duration is typically 24h if parsing completely fails? Or CRDT logic specific?
-      // Legacy test expected 24h.
-      expect(task.end.difference(task.start).inHours, equals(24));
+      final endDt = DateTime.parse(task.end);
+      final startDt = DateTime.parse(task.start);
+      expect(endDt.isAfter(startDt), isTrue);
+      expect(endDt.difference(startDt).inHours, equals(24));
     });
 
     test(
@@ -72,10 +74,11 @@ void main() {
 
         final result = engine.mergeTasks([], [op1, op2]);
         expect(result.length, 1);
-        expect(result.first.start, equals(DateTime.utc(2025, 12, 26, 11)));
+        expect(result.first.start,
+            equals(DateTime.utc(2025, 12, 26, 11).toIso8601String()));
         expect(
           result.first.end,
-          equals(DateTime.utc(2025, 12, 26, 12)),
+          equals(DateTime.utc(2025, 12, 26, 12).toIso8601String()),
         ); // Preserved from op1
       },
     );

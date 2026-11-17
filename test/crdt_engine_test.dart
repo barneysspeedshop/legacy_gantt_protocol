@@ -12,14 +12,13 @@ void main() {
     });
 
     test('should merge new task update', () {
-      final task = ProtocolTask(
-        id: '1',
-        rowId: 'row1',
-        start: DateTime(2023, 1, 1),
-        end: DateTime(2023, 1, 5),
-        name: 'Task 1',
-        lastUpdated: Hlc.zero,
-      );
+      final task = ProtocolTask()
+        ..id = '1'
+        ..rowId = 'row1'
+        ..start = DateTime(2023, 1, 1).toIso8601String()
+        ..end = DateTime(2023, 1, 5).toIso8601String()
+        ..name = 'Task 1'
+        ..lastUpdated = Hlc.zero.toString();
 
       final op = Operation(
         type: 'UPDATE_TASK',
@@ -37,23 +36,23 @@ void main() {
       final result = engine.mergeTasks([task], [op]);
 
       expect(result.length, 1);
-      expect(result.first.start, DateTime(2023, 1, 2));
-      expect(result.first.end, DateTime(2023, 1, 6));
+      expect(
+          result.first.start, DateTime(2023, 1, 2).toUtc().toIso8601String());
+      expect(result.first.end, DateTime(2023, 1, 6).toUtc().toIso8601String());
       expect(result.first.name, 'Task 1 Updated');
-      expect(result.first.lastUpdated, Hlc.fromIntTimestamp(100));
+      expect(result.first.lastUpdated, Hlc.fromIntTimestamp(100).toString());
       expect(result.first.lastUpdatedBy, 'user1');
     });
 
     test('should ignore older update', () {
-      final task = ProtocolTask(
-        id: '1',
-        rowId: 'row1',
-        start: DateTime(2023, 1, 2),
-        end: DateTime(2023, 1, 6),
-        name: 'Task 1 Updated',
-        lastUpdated: Hlc.fromIntTimestamp(200),
-        lastUpdatedBy: 'user1',
-      );
+      final task = ProtocolTask()
+        ..id = '1'
+        ..rowId = 'row1'
+        ..start = DateTime(2023, 1, 2).toIso8601String()
+        ..end = DateTime(2023, 1, 6).toIso8601String()
+        ..name = 'Task 1 Updated'
+        ..lastUpdated = Hlc.fromIntTimestamp(200).toString()
+        ..lastUpdatedBy = 'user1';
 
       final op = Operation(
         type: 'UPDATE_TASK',
@@ -72,7 +71,7 @@ void main() {
 
       expect(result.length, 1);
       // Values should remain unchanged
-      expect(result.first.start, DateTime(2023, 1, 2));
+      expect(result.first.start, DateTime(2023, 1, 2).toIso8601String());
       expect(result.first.name, 'Task 1 Updated');
     });
 

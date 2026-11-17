@@ -33,7 +33,7 @@ To compare two HLCs, `A` and `B`:
 
 ## 2. Operation Log
 
-The synchronization stream consists of an ordered sequence of JSON **Operations**.
+The synchronization stream consists of an ordered sequence of logical **Operations**, shown below in decoded JSON form. Production WebSocket frames encode them as Protobuf messages (see §5).
 
 ### 2.1 Schema
 
@@ -222,7 +222,13 @@ The content hash of a Task/Resource/Dependency is the **SHA-256** hash of its de
 
 ## 5. Transport Protocol (WebSocket)
 
-While the data format is transport-agnostic, the standard real-time implementation uses WebSockets.
+The production Dart server and Flutter client exchange **binary WebSocket frames** containing `ProtocolMessage` from [`proto/gantt_protocol.proto`](proto/gantt_protocol.proto). JSON blocks in this document show the logical decoded messages, not text frames to send directly to the production server.
+
+Use `ProtobufMapper.toProtobuf(message).writeToBuffer()` to encode logical operations and `ProtobufMapper.toJson(ProtocolMessage.fromBuffer(bytes))` to decode them. Generated task dates and HLC values are strings, dependency lag is an integer millisecond duration, and extensible metadata is carried in `metadataJson`. Domain models convert these values at their boundaries. Batch task/resource deletes set `isDeleted`; each entry retains its own HLC.
+
+The minimal Go reference server retains a JSON text transport for logical protocol testing. It is not a drop-in transport peer for the binary production client. Clients targeting the production server must generate bindings from the schema above.
+
+The wire schema has no `schemaVersion` field; the logical operation version remains an application concern.
 
 ### 5.1 Connection Handshake
 

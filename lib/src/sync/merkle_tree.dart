@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 
 import 'hlc.dart';
+import 'merkle_hash_normalizer.dart';
 
 /// Represents a node in the Merkle Tree.
 class MerkleNode {
@@ -98,16 +99,8 @@ class MerkleTree {
     final Map<String, List<String>> hourBuckets = {};
 
     for (final entry in items) {
-      final hlcStr = entry.key;
       final contentHash = entry.value;
-
-      // Extract ISO prefix "YYYY-MM-DDTHH:mm" (16 chars)
-      // If invalid or too short, bucket into a default "0000-00-00T00:00"
-      String minutePrefix = '0000-00-00T00:00';
-      if (hlcStr.length >= 16 && hlcStr.contains('T') && hlcStr.contains(':')) {
-        minutePrefix = hlcStr.substring(0, 16);
-      }
-
+      final minutePrefix = MerkleHashNormalizer.merkleMinutePrefix(entry.key);
       hourBuckets.putIfAbsent(minutePrefix, () => []).add(contentHash);
     }
 

@@ -1,0 +1,119 @@
+syntax = "proto3";
+
+package gantt_protocol;
+
+message ProtocolTask {
+  string id = 1;
+  string rowId = 2;
+  string start = 3;
+  string end = 4;
+  string name = 5;
+  double completion = 6;
+  bool isSummary = 7;
+  bool isMilestone = 8;
+  string resourceId = 9;
+  string parentId = 10;
+  string notes = 11;
+  bool isDeleted = 12;
+  string lastUpdated = 13;
+  string lastUpdatedBy = 14;
+  map<string, string> fieldTimestamps = 15;
+  string metadataJson = 16;
+}
+
+message ProtocolDependency {
+  string predecessorTaskId = 1;
+  string successorTaskId = 2;
+  string type = 3;
+  int64 lag = 4;
+  string lastUpdated = 5;
+}
+
+message ProtocolResource {
+  string id = 1;
+  string name = 2;
+  string parentId = 3;
+  string type = 4;
+  bool isDeleted = 5;
+  string metadataJson = 6;
+  string lastUpdated = 7;
+}
+
+message MerkleNode {
+  string prefix = 1;
+  string hash = 2;
+  map<string, MerkleNode> children = 3;
+}
+
+message SubscribeRequest {
+  string channel = 1;
+  string last_synced_timestamp = 2;
+}
+
+message BatchUpdatePayload {
+  repeated ProtocolTask tasks = 1;
+  repeated ProtocolDependency dependencies = 2;
+  repeated ProtocolResource resources = 3;
+}
+
+message SyncMetadataPayload {
+  int64 total_operations = 1;
+}
+
+message MerkleRootPayload {
+  string root = 1;
+}
+
+message MerkleNodePayload {
+  string prefix = 1;
+  map<string, string> children = 2;
+}
+
+message SingleOperationPayload {
+  string operation_type = 1;
+  ProtocolTask task = 2;
+  ProtocolDependency dependency = 3;
+  ProtocolResource resource = 4;
+  string metadataJson = 5;
+}
+
+message GetMerkleNodeRequest {
+  string prefix = 1;
+}
+
+message GetEntitiesInRangeRequest {
+  string prefix = 1;
+}
+
+message ProtocolMessage {
+  string type = 1;
+  string channel = 2;
+  string timestamp = 3;
+  string actor_id = 4;
+  string error = 5;
+
+  oneof payload {
+    SubscribeRequest subscribe = 10;
+    BatchUpdatePayload batch_update = 11;
+    SyncMetadataPayload sync_metadata = 12;
+    MerkleRootPayload merkle_root = 13;
+    MerkleNodePayload merkle_node = 14;
+    SingleOperationPayload single_operation = 15;
+    GetMerkleNodeRequest get_merkle_node = 16;
+    GetEntitiesInRangeRequest get_entities_in_range = 17;
+    SolverRequest solver_request = 20;
+    SolverResponse solver_response = 21;
+  }
+}
+
+message SolverRequest {
+  repeated ProtocolTask tasks = 1;
+  repeated ProtocolDependency dependencies = 2;
+  int32 algorithmLevel = 3;
+}
+
+message SolverResponse {
+  bool success = 1;
+  string errorMessage = 2;
+  repeated ProtocolTask tasks = 3;
+}
