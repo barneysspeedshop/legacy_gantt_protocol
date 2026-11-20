@@ -272,3 +272,22 @@ The wire schema has no `schemaVersion` field; the logical operation version rema
   "actorId": "server"
 }
 ```
+
+
+### Version 4 CRDT merge semantics
+
+Tasks use per-field hybrid logical clocks and a separate `isDeleted` presence register in `fieldTimestamps`. A live write advances its presence clock to its operation clock. A deletion advances only the presence register; deletion wins an equal presence clock. Historical fields continue to merge while a task remains deleted. Full snapshots preserve field clocks so replay does not promote unchanged fields to the envelope clock. A `DELETE_TASK` payload with nonempty `fieldTimestamps` is a full tombstone snapshot; a deletion without field clocks is an identity-only presence command, so default Protobuf scalar values cannot erase existing task history. Legacy snapshot producers must materialize baseline field clocks before replay.
+
+Resources are complete last-write-wins records. Every live write supplies its complete fields and metadata. Omitted properties use protocol defaults rather than inheriting an earlier record. Resource deletion produces a minimal tombstone: its ID, empty name and parent, `person` type, `isDeleted: true`, empty metadata, and deletion HLC. Dependency tombstones contain the predecessor and successor IDs, `DELETE` type, zero lag, and deletion HLC. These minimal tombstones make deletion independent of prior delivery order; applications that need historical resource metadata or lag must store that history separately.
+
+A data reset registers deletion presence at its HLC. A task edited after the reset can remain live, while historical task fields still merge against their individual clocks. If an older task arrives after the reset, consumers first register a virtual tombstone at the reset HLC for its ID, then merge the historical fields without resurrecting it. Resources and dependencies arriving at or before a reset remain minimal reset tombstones. Clients and servers must apply the same rules before hashing canonical state.
+
+
+Version 4 task Merkle hashes cover both canonical values and per-field causal clocks. Missing legacy clocks expand to the task's entity clock (or the zero clock for an unclocked task) for every known core field and normalized metadata field. Explicit clocks, including custom metadata clocks, take precedence and use canonical HLC encodings. The UI-only clock keys `startIsUtc`, `endIsUtc`, `baselineStartIsUtc`, `baselineEndIsUtc`, `segments`, and `hasCellBuilder` are excluded, matching their normalized display-only values. Actor identity is excluded.
+
+Full task snapshots carry complete metadata defaults and causal field clocks so that replay preserves future merge behavior. Existing local metadata values, including UTC display flags, override filled defaults. Merkle recovery must merge local canonical records into the server before pulling the merged server state; a pull-only repair cannot recover a locally accepted register that the server never received. An existing envelope `channel` value correlates `GET_MERKLE_ROOT` requests and responses; unsolicited root broadcasts have no correlation channel. On a single WebSocket, a correlated root response is sent only after preceding repair operations have committed. This adds no Protobuf fields or operation types.
+
+
+Entity clocks participate in task, resource, and dependency hashes even when values are unchanged within the same minute bucket. Project reset control participates as a synthetic Merkle entry: its key is the canonical reset HLC and its value is SHA-256 of `RESET_DATA:<canonical reset HLC>`. The optional `resetTimestamp` argument to `CRDTEngine.computeMerkleTree` and `computeMerkleRoot` supplies this control state; `CRDTEngine.resetMerkleEntry` exposes the shared entry encoding.
+
+Range recovery uses a unique existing envelope `channel` correlation value on `GET_ENTITIES_IN_RANGE`. The server sends a matching reset control operation as a standalone `RESET_DATA` before the entity response, then exactly one `BATCH_UPDATE` with the request correlation channel, including an empty batch when necessary. The batch signals that the requested range has completed; unrelated broadcasts do not complete recovery. Legacy requests without a correlation channel retain their range-prefix response channel.

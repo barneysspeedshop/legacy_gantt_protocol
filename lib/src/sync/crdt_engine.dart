@@ -98,13 +98,6 @@ class CRDTEngine {
     if (resourceId == null) return;
 
     final existing = resourceMap[resourceId];
-    if (existing != null &&
-        existing.isDeleted &&
-        op.type != 'DELETE_RESOURCE' &&
-        effectiveData['isDeleted'] != true &&
-        op.timestamp <= existing.parsedLastUpdated) {
-      return;
-    }
     // If not exists, create new
     final base =
         existing ??
@@ -126,43 +119,29 @@ class CRDTEngine {
     Operation op,
     Map<String, dynamic> changes,
   ) {
-    if (op.timestamp < target.parsedLastUpdated) return target;
-
-    String newName = target.name;
-    if (changes.containsKey('name')) newName = changes['name'];
-
-    String? newParentId = target.parentId;
-    if (changes.containsKey('parentId')) newParentId = changes['parentId'];
-
-    String newType = target.type;
-    if (changes.containsKey('type') || changes.containsKey('ganttType')) {
-      newType = changes['type'] ?? changes['ganttType'];
+    final deleted = changes['isDeleted'] == true;
+    if (op.timestamp < target.parsedLastUpdated ||
+        (target.isDeleted &&
+            !deleted &&
+            op.timestamp <= target.parsedLastUpdated)) {
+      return target;
     }
-
-    // Metadata merging
-    Map<String, dynamic> currentMetadata = {};
-    if (target.hasMetadataJson() && target.metadataJson.isNotEmpty) {
-      try {
-        currentMetadata =
-            jsonDecode(target.metadataJson) as Map<String, dynamic>;
-      } catch (_) {}
+    if (deleted) {
+      return ProtocolResource(
+        id: target.id,
+        name: '',
+        parentId: '',
+        type: 'person',
+        isDeleted: true,
+        metadataJson: '{}',
+        lastUpdated: op.timestamp.toString(),
+      );
     }
-
-    final Map<String, dynamic> newMetadata = Map.from(currentMetadata);
-    newMetadata.addAll(ProtobufMapper.metadataFromJson(changes));
-
-    // Implicit resurrection
-    final maxHlc = op.timestamp > target.parsedLastUpdated
-        ? op.timestamp
-        : target.parsedLastUpdated;
-
-    return target.deepCopy()
-      ..name = newName
-      ..parentId = newParentId ?? ''
-      ..type = newType
-      ..isDeleted = changes['isDeleted'] == true
-      ..metadataJson = jsonEncode(newMetadata)
-      ..lastUpdated = maxHlc.toString();
+    // Resource updates are complete LWW records. Inheriting an absent field
+    // from previous state would make replay depend on delivery order.
+    return ProtobufMapper.resourceFromJson(changes)
+      ..lastUpdated = op.timestamp.toString()
+      ..isDeleted = false;
   }
 
   void _applyOp(Map<String, ProtocolTask> taskMap, Operation op) {
@@ -178,12 +157,19 @@ class CRDTEngine {
           (ProtocolTask()
             ..id = taskId
             ..rowId = ''
-            ..start = DateTime.utc(0).toIso8601String()
-            ..end = DateTime.utc(0).toIso8601String()
+            ..start = DateTime.utc(1970, 1, 1).toIso8601String()
+            ..end = DateTime.utc(1970, 1, 2).toIso8601String()
             ..lastUpdated = Hlc.zero.toString()
             ..isDeleted = true); // minimally valid tombstone
 
-      taskMap[taskId] = _mergeTask(base, op, {...op.data, 'isDeleted': true});
+      final fieldClocks = op.data['fieldTimestamps'];
+      final deletionData = fieldClocks is Map && fieldClocks.isNotEmpty
+          ? op.data
+          : <String, dynamic>{'id': taskId};
+      taskMap[taskId] = _mergeTask(base, op, {
+        ...deletionData,
+        'isDeleted': true,
+      });
       return;
     }
 
@@ -202,13 +188,6 @@ class CRDTEngine {
     if (taskId == null) return;
 
     final existing = taskMap[taskId];
-    if (existing != null &&
-        existing.isDeleted &&
-        effectiveData['isDeleted'] != true &&
-        op.timestamp <= existing.parsedLastUpdated) {
-      return;
-    }
-
     // For INSERT/UPDATE, we assume isDeleted=false (Resurrection)
     final base =
         existing ??
@@ -218,7 +197,7 @@ class CRDTEngine {
           ..start = DateTime.utc(1970, 1, 1).toIso8601String()
           ..end = DateTime.utc(1970, 1, 2).toIso8601String()
           ..lastUpdated = Hlc.zero.toString()
-          ..isDeleted = true);
+          ..isDeleted = false);
 
     // Inject isDeleted=false into the data to force resurrection check
     final mergeData = Map<String, dynamic>.from(effectiveData);
@@ -233,18 +212,50 @@ class CRDTEngine {
     Map<String, dynamic> changes,
   ) {
     final newTimestamps = Map<String, String>.from(target.fieldTimestamps);
+    final baseline = target.lastUpdated.isEmpty
+        ? Hlc.zero.toString()
+        : target.lastUpdated;
+    for (final field in MerkleHashNormalizer.taskCoreFields) {
+      newTimestamps.putIfAbsent(field, () => baseline);
+    }
+    final priorMetadata = ProtobufMapper.metadataFromJson({
+      'metadataJson': target.metadataJson,
+    });
+    for (final key in MerkleHashNormalizer.normalizeTaskMetadata(
+      priorMetadata,
+    ).keys) {
+      newTimestamps.putIfAbsent(key, () => baseline);
+    }
 
-    // Helper to check LWW per field
+    final incomingTimestamps = changes['fieldTimestamps'] as Map?;
+    Hlc fieldClock(String field) {
+      if (field == 'isDeleted' && changes['isDeleted'] != true) {
+        return op.timestamp;
+      }
+      final value = incomingTimestamps?[field];
+      return value is String && value.isNotEmpty
+          ? Hlc.parse(value)
+          : op.timestamp;
+    }
+
+    // Snapshot fields keep their individual clocks; a newer envelope does not
+    // turn unchanged fields into newer edits.
     bool shouldUpdate(String field) {
-      final lastHlcStr = newTimestamps[field] ?? target.lastUpdated;
+      final lastHlcStr = newTimestamps[field] ?? Hlc.zero.toString();
       final lastHlc = lastHlcStr.isNotEmpty ? Hlc.parse(lastHlcStr) : Hlc.zero;
-      return op.timestamp >= lastHlc;
+      return fieldClock(field) >= lastHlc;
     }
 
     // Helper to update field
     T update<T>(String field, T candidate, T current) {
+      if (field == 'isDeleted' &&
+          current == true &&
+          candidate == false &&
+          fieldClock(field) <= Hlc.parse(newTimestamps[field]!)) {
+        return current;
+      }
       if (shouldUpdate(field)) {
-        newTimestamps[field] = op.timestamp.toString();
+        newTimestamps[field] = fieldClock(field).toString();
         return candidate;
       }
       return current;
@@ -361,13 +372,17 @@ class CRDTEngine {
     ProtobufMapper.metadataFromJson(changes).forEach((key, value) {
       if (shouldUpdate(key)) {
         newMetadata[key] = value;
-        newTimestamps[key] = op.timestamp.toString();
+        newTimestamps[key] = fieldClock(key).toString();
       }
     });
 
-    final maxHlc = op.timestamp > target.parsedLastUpdated
+    var maxHlc = op.timestamp > target.parsedLastUpdated
         ? op.timestamp
         : target.parsedLastUpdated;
+    for (final value in newTimestamps.values) {
+      final fieldHlc = Hlc.parse(value);
+      if (fieldHlc > maxHlc) maxHlc = fieldHlc;
+    }
     final maxActor = op.timestamp > target.parsedLastUpdated
         ? op.actorId
         : target.lastUpdatedBy;
@@ -388,7 +403,9 @@ class CRDTEngine {
       ..isDeleted = newIsDeleted
       ..lastUpdated = maxHlc.toString()
       ..lastUpdatedBy = maxActor
-      ..metadataJson = jsonEncode(newMetadata);
+      ..metadataJson = jsonEncode(
+        MerkleHashNormalizer.completeTaskMetadata(newMetadata),
+      );
   }
 
   DateTime? _parseDate(dynamic value) {
@@ -405,10 +422,16 @@ class CRDTEngine {
   }
 
   /// Computes the full Merkle Tree for a list of tasks and dependencies using the deterministic content hash.
+  static MapEntry<String, String> resetMerkleEntry(Hlc timestamp) => MapEntry(
+    timestamp.toString(),
+    MerkleTree.hash('RESET_DATA:${timestamp.toString()}'),
+  );
+
   MerkleTree computeMerkleTree(
     List<ProtocolTask> tasks, {
     List<ProtocolDependency> dependencies = const [],
     List<ProtocolResource> resources = const [],
+    Hlc? resetTimestamp,
   }) {
     final List<MapEntry<String, String>> items = [];
 
@@ -443,6 +466,7 @@ class CRDTEngine {
       );
     }
 
+    if (resetTimestamp != null) items.add(resetMerkleEntry(resetTimestamp));
     return MerkleTree.build(items);
   }
 
@@ -451,11 +475,13 @@ class CRDTEngine {
     List<ProtocolTask> tasks, {
     List<ProtocolDependency> dependencies = const [],
     List<ProtocolResource> resources = const [],
+    Hlc? resetTimestamp,
   }) {
     final tree = computeMerkleTree(
       tasks,
       dependencies: dependencies,
       resources: resources,
+      resetTimestamp: resetTimestamp,
     );
     return tree.root.hash;
   }
