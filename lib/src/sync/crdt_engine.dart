@@ -162,7 +162,14 @@ class CRDTEngine {
             ..lastUpdated = Hlc.zero.toString()
             ..isDeleted = true); // minimally valid tombstone
 
-      taskMap[taskId] = _mergeTask(base, op, {...op.data, 'isDeleted': true});
+      final fieldClocks = op.data['fieldTimestamps'];
+      final deletionData = fieldClocks is Map && fieldClocks.isNotEmpty
+          ? op.data
+          : <String, dynamic>{'id': taskId};
+      taskMap[taskId] = _mergeTask(base, op, {
+        ...deletionData,
+        'isDeleted': true,
+      });
       return;
     }
 

@@ -271,6 +271,38 @@ void main() {
       expect(hidden.isDeleted, true);
     },
   );
+  test(
+    'bare protobuf deletion preserves content while clocked snapshots recover history',
+    () {
+      final engine = CRDTEngine();
+      final original = engine.mergeTasks([], [
+        edit(100, {'name': 'Retained', 'notes': 'History'}),
+      ]).single;
+      final wire = ProtobufMapper.toJson(
+        ProtobufMapper.toProtobuf(
+          Operation(
+            type: 'DELETE_TASK',
+            data: {'id': 'task'},
+            timestamp: clock(200),
+            actorId: 'fixture',
+          ).toJson(),
+        ),
+      );
+      final bare = Operation.fromJson(wire);
+      final deleted = engine.mergeTasks([original], [bare]).single;
+      expect(deleted.name, 'Retained');
+      expect(deleted.notes, 'History');
+      expect(deleted.isDeleted, true);
+      final snapshot = Operation(
+        type: 'DELETE_TASK',
+        data: ProtobufMapper.taskToJson(deleted),
+        timestamp: clock(200),
+        actorId: 'fixture',
+      );
+      final recovered = engine.mergeTasks([], [snapshot]).single;
+      expect(recovered.contentHash, deleted.contentHash);
+    },
+  );
 }
 
 Iterable<List<T>> permutations<T>(List<T> values) sync* {

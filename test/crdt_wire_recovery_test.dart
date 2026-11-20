@@ -53,6 +53,7 @@ void main() {
         'isDeleted': true,
         'lastUpdated': clock.toString(),
         'lastUpdatedBy': 'server',
+        'fieldTimestamps': {'isDeleted': clock.toString()},
         'metadataJson': jsonEncode({'color': 0xffaabbcc}),
       };
       final merged = engine.mergeTasks([], [
