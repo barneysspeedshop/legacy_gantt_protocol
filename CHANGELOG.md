@@ -1,3 +1,9 @@
+## 3.0.2
+
+* Ignore delayed task deletions older than the accepted task state, making deletion/update replay order consistent.
+
+* Preserve individual task field clocks when merging full snapshots, so delayed offline edits to independent fields survive reconnect and replay.
+
 ## 3.0.1
 
 * Reject task and resource resurrection at or before their deletion clock. Preserve tombstone content during stale retries; strictly newer edits can still restore deleted entities.

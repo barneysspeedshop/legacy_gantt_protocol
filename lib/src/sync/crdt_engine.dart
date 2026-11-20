@@ -171,6 +171,7 @@ class CRDTEngine {
       if (taskId == null) return;
 
       final existing = taskMap[taskId];
+      if (existing != null && op.timestamp < existing.parsedLastUpdated) return;
 
       // Basic tombstone creation
       final base =
@@ -234,17 +235,26 @@ class CRDTEngine {
   ) {
     final newTimestamps = Map<String, String>.from(target.fieldTimestamps);
 
-    // Helper to check LWW per field
+    final incomingTimestamps = changes['fieldTimestamps'] as Map?;
+    Hlc fieldClock(String field) {
+      final value = incomingTimestamps?[field];
+      return value is String && value.isNotEmpty
+          ? Hlc.parse(value)
+          : op.timestamp;
+    }
+
+    // Snapshot fields keep their individual clocks; a newer envelope does not
+    // turn unchanged fields into newer edits.
     bool shouldUpdate(String field) {
       final lastHlcStr = newTimestamps[field] ?? target.lastUpdated;
       final lastHlc = lastHlcStr.isNotEmpty ? Hlc.parse(lastHlcStr) : Hlc.zero;
-      return op.timestamp >= lastHlc;
+      return fieldClock(field) >= lastHlc;
     }
 
     // Helper to update field
     T update<T>(String field, T candidate, T current) {
       if (shouldUpdate(field)) {
-        newTimestamps[field] = op.timestamp.toString();
+        newTimestamps[field] = fieldClock(field).toString();
         return candidate;
       }
       return current;
@@ -361,13 +371,17 @@ class CRDTEngine {
     ProtobufMapper.metadataFromJson(changes).forEach((key, value) {
       if (shouldUpdate(key)) {
         newMetadata[key] = value;
-        newTimestamps[key] = op.timestamp.toString();
+        newTimestamps[key] = fieldClock(key).toString();
       }
     });
 
-    final maxHlc = op.timestamp > target.parsedLastUpdated
+    var maxHlc = op.timestamp > target.parsedLastUpdated
         ? op.timestamp
         : target.parsedLastUpdated;
+    for (final value in newTimestamps.values) {
+      final fieldHlc = Hlc.parse(value);
+      if (fieldHlc > maxHlc) maxHlc = fieldHlc;
+    }
     final maxActor = op.timestamp > target.parsedLastUpdated
         ? op.actorId
         : target.lastUpdatedBy;
