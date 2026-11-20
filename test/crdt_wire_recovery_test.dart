@@ -72,35 +72,53 @@ void main() {
       expect(engine.mergeTasks(merged, [stale]).single.isDeleted, isTrue);
     },
   );
-  test('fresh resource tombstone recovery retains full snapshot and hash', () {
-    final snapshot = {
-      'id': 'resource',
-      'name': 'Deleted',
-      'type': 'group',
-      'isDeleted': true,
-      'lastUpdated': clock.toString(),
-      'metadataJson': jsonEncode({'sortOrder': 2}),
-    };
-    final merged = engine.mergeResources([], [
-      wireOperation('DELETE_RESOURCE', snapshot, clock),
-    ]);
-    expect(merged, hasLength(1));
-    expect(merged.single.isDeleted, isTrue);
-    expect(
-      engine.computeMerkleRoot([], resources: merged),
-      engine.computeMerkleRoot(
-        [],
-        resources: [ProtobufMapper.resourceFromJson(snapshot)],
-      ),
-    );
-  });
-  test('task tombstones reject older and equal-clock live updates', () {
+  test(
+    'fresh resource tombstone recovery produces a canonical minimal record',
+    () {
+      final snapshot = {
+        'id': 'resource',
+        'name': 'Deleted',
+        'type': 'group',
+        'isDeleted': true,
+        'lastUpdated': clock.toString(),
+        'metadataJson': jsonEncode({'sortOrder': 2}),
+      };
+      final merged = engine.mergeResources([], [
+        wireOperation('DELETE_RESOURCE', snapshot, clock),
+      ]);
+      expect(merged, hasLength(1));
+      expect(merged.single.isDeleted, isTrue);
+      expect(
+        engine.computeMerkleRoot([], resources: merged),
+        engine.computeMerkleRoot(
+          [],
+          resources: [
+            ProtobufMapper.resourceFromJson({
+              'id': 'resource',
+              'name': '',
+              'parentId': '',
+              'type': 'person',
+              'isDeleted': true,
+              'lastUpdated': clock.toString(),
+              'metadataJson': '{}',
+            }),
+          ],
+        ),
+      );
+    },
+  );
+  test('task tombstones merge historical fields without resurrection', () {
     final tombstone = ProtobufMapper.taskFromJson({
       'id': 'deleted',
       'name': 'Deleted',
       'isDeleted': true,
       'lastUpdated': clock.toString(),
       'metadataJson': '{"color":42}',
+      'fieldTimestamps': {
+        'isDeleted': clock.toString(),
+        'name': Hlc.fromIntTimestamp(500).toString(),
+        'color': Hlc.fromIntTimestamp(500).toString(),
+      },
     });
     for (final type in ['INSERT_TASK', 'UPDATE_TASK']) {
       for (final millis in [1000, 2000]) {
@@ -115,7 +133,8 @@ void main() {
           ],
         );
         expect(merged.single.isDeleted, isTrue, reason: '$type at $millis');
-        expect(merged.single.contentHash, tombstone.contentHash);
+        expect(merged.single.name, 'Stale');
+        expect(jsonDecode(merged.single.metadataJson)['color'], 99);
         expect(merged.single.lastUpdated, clock.toString());
       }
     }

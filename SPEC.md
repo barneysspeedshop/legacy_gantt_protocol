@@ -272,3 +272,12 @@ The wire schema has no `schemaVersion` field; the logical operation version rema
   "actorId": "server"
 }
 ```
+
+
+### Version 4 CRDT merge semantics
+
+Tasks use per-field hybrid logical clocks and a separate `isDeleted` presence register in `fieldTimestamps`. A live write advances its presence clock to its operation clock. A deletion advances only the presence register; deletion wins an equal presence clock. Historical fields continue to merge while a task remains deleted. Full snapshots preserve field clocks so replay does not promote unchanged fields to the envelope clock.
+
+Resources are complete last-write-wins records. Every live write supplies its complete fields and metadata. Omitted properties use protocol defaults rather than inheriting an earlier record. Resource deletion produces a minimal tombstone: its ID, empty name and parent, `person` type, `isDeleted: true`, empty metadata, and deletion HLC. Dependency tombstones contain the predecessor and successor IDs, `DELETE` type, zero lag, and deletion HLC. These minimal tombstones make deletion independent of prior delivery order; applications that need historical resource metadata or lag must store that history separately.
+
+A data reset registers deletion presence at its HLC. A task edited after the reset can remain live, while historical task fields still merge against their individual clocks. If an older task arrives after the reset, consumers first register a virtual tombstone at the reset HLC for its ID, then merge the historical fields without resurrecting it. Resources and dependencies arriving at or before a reset remain minimal reset tombstones. Clients and servers must apply the same rules before hashing canonical state.
