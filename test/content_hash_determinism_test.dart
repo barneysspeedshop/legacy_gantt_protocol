@@ -30,7 +30,7 @@ void main() {
     );
 
     test(
-      'ProtocolTask contentHash ignores lastUpdated, lastUpdatedBy, and fieldTimestamps',
+      'ProtocolTask contentHash includes causal field clocks and ignores actor identity',
       () {
         final t1 = ProtocolTask()
           ..id = 'task1'
@@ -46,7 +46,12 @@ void main() {
           ..lastUpdatedBy = 'userB'
           ..fieldTimestamps['name'] = '2026-05-17T19:00:00.000Z';
 
-        expect(t1.contentHash, equals(t2.contentHash));
+        expect(t1.contentHash, isNot(t2.contentHash));
+        t2
+          ..lastUpdated = t1.lastUpdated
+          ..fieldTimestamps.clear()
+          ..fieldTimestamps.addAll(t1.fieldTimestamps);
+        expect(t1.contentHash, t2.contentHash);
       },
     );
 

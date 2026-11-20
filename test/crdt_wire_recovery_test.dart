@@ -56,6 +56,16 @@ void main() {
         'fieldTimestamps': {'isDeleted': clock.toString()},
         'metadataJson': jsonEncode({'color': 0xffaabbcc}),
       };
+      final canonical = ProtobufMapper.taskFromJson(snapshot);
+      canonical.fieldTimestamps.addAll(canonical.normalizedFieldTimestamps);
+      snapshot['fieldTimestamps'] = Map<String, String>.from(
+        canonical.fieldTimestamps,
+      );
+      snapshot['metadataJson'] = jsonEncode(
+        MerkleHashNormalizer.completeTaskMetadata(
+          jsonDecode(canonical.metadataJson) as Map<String, dynamic>,
+        ),
+      );
       final merged = engine.mergeTasks([], [
         wireOperation('DELETE_TASK', snapshot, clock),
       ]);

@@ -26,6 +26,7 @@ String _canonicalMetadata(
 extension ProtocolTaskExtensions on ProtocolTask {
   String get contentHash => _contentHash({
     'id': id,
+    'lastUpdated': parsedLastUpdated.toString(),
     'rowId': rowId,
     'start': start,
     'end': end,
@@ -37,11 +38,32 @@ extension ProtocolTaskExtensions on ProtocolTask {
     'parentId': parentId,
     'notes': notes,
     'isDeleted': isDeleted,
+    'fieldTimestamps': {
+      for (final entry in normalizedFieldTimestamps.entries)
+        if (!MerkleHashNormalizer.taskNonCausalFields.contains(entry.key))
+          entry.key: entry.value,
+    },
     'metadataJson': _canonicalMetadata(
       metadataJson,
       MerkleHashNormalizer.normalizeTaskMetadata,
     ),
   });
+
+  Map<String, String> get normalizedFieldTimestamps {
+    Map<String, dynamic> metadata;
+    try {
+      metadata = metadataJson.isEmpty
+          ? <String, dynamic>{}
+          : jsonDecode(metadataJson) as Map<String, dynamic>;
+    } catch (_) {
+      metadata = <String, dynamic>{};
+    }
+    return MerkleHashNormalizer.normalizeTaskFieldTimestamps(
+      fieldTimestamps: fieldTimestamps,
+      lastUpdated: lastUpdated,
+      metadata: metadata,
+    );
+  }
 
   Hlc get parsedLastUpdated {
     if (hasLastUpdated() && lastUpdated.isNotEmpty) {
@@ -53,6 +75,7 @@ extension ProtocolTaskExtensions on ProtocolTask {
 
 extension ProtocolDependencyExtensions on ProtocolDependency {
   String get contentHash => _contentHash({
+    'lastUpdated': parsedLastUpdated.toString(),
     'predecessorTaskId': predecessorTaskId,
     'successorTaskId': successorTaskId,
     'type': type,
@@ -72,6 +95,7 @@ extension ProtocolResourceExtensions on ProtocolResource {
     final resourceType = type.isEmpty ? 'person' : type;
     return _contentHash({
       'id': id,
+      'lastUpdated': parsedLastUpdated.toString(),
       'name': name,
       'parentId': parentId,
       'type': resourceType,

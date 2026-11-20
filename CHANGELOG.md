@@ -2,6 +2,7 @@
 
 * **BREAKING**: Resource writes are complete LWW records. Include all resource fields and metadata on each write; omitted fields no longer inherit previous values.
 * **BREAKING**: Resource tombstones are canonical minimal records (identity, empty name/parent, `person` type, empty metadata, deletion clock). Dependency tombstones retain endpoint identities, `DELETE` type, zero lag, and deletion clock. Deleted resource metadata and dependency lag are no longer historical storage.
+* **BREAKING**: Integrity hashes include entity clocks, task per-field causal clocks, and the project reset epoch, so equal displayed values with different future merge behavior no longer compare as synchronized. UI-only date/renderer clocks and actor identity remain excluded.
 * Task existence is a separate presence register. Delayed historical field edits can merge into deleted tasks without resurrecting them; strictly newer live edits can restore them. Deletion wins equal presence clocks.
 * Preserve individual task field clocks through full snapshots and replay, including independent offline edits received out of order.
 * Reset-aware consumers must register reset presence for unknown historical task IDs rather than dropping historical field data. Deploy compatible clients and servers together; this changes CRDT merge semantics without changing the Protobuf schema.

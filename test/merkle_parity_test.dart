@@ -20,7 +20,8 @@ ProtocolTask serverTaskHashProto(Map<String, dynamic> row) {
     ..isSummary =
         row['gantt_type'] == 'project' || row['gantt_type'] == 'summary'
     ..isMilestone = row['gantt_type'] == 'milestone'
-    ..isDeleted = row['is_deleted'] == true || row['is_deleted'] == 1;
+    ..isDeleted = row['is_deleted'] == true || row['is_deleted'] == 1
+    ..lastUpdated = row['last_updated']?.toString() ?? '';
 
   if (row['name'] != null) pt.name = row['name'];
   if (row['resource_id'] != null) pt.resourceId = row['resource_id'].toString();
@@ -56,7 +57,8 @@ ProtocolDependency serverDependencyHashProto(Map<String, dynamic> row) {
   final pd = ProtocolDependency()
     ..predecessorTaskId = row['predecessor_task_id']?.toString() ?? ''
     ..successorTaskId = row['successor_task_id']?.toString() ?? ''
-    ..type = row['dependency_type']?.toString() ?? 'finishToStart';
+    ..type = row['dependency_type']?.toString() ?? 'finishToStart'
+    ..lastUpdated = row['last_updated']?.toString() ?? '';
   return pd;
 }
 
@@ -151,6 +153,7 @@ void main() {
         ],
       );
 
+      clientProto.lastUpdated = serverProto.lastUpdated;
       expect(serverProto.contentHash, clientProto.contentHash);
     });
 

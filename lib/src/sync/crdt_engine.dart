@@ -215,25 +215,15 @@ class CRDTEngine {
     final baseline = target.lastUpdated.isEmpty
         ? Hlc.zero.toString()
         : target.lastUpdated;
-    for (final field in [
-      'rowId',
-      'start',
-      'end',
-      'name',
-      'completion',
-      'resourceId',
-      'parentId',
-      'notes',
-      'isSummary',
-      'isMilestone',
-      'isDeleted',
-    ]) {
+    for (final field in MerkleHashNormalizer.taskCoreFields) {
       newTimestamps.putIfAbsent(field, () => baseline);
     }
     final priorMetadata = ProtobufMapper.metadataFromJson({
       'metadataJson': target.metadataJson,
     });
-    for (final key in priorMetadata.keys) {
+    for (final key in MerkleHashNormalizer.normalizeTaskMetadata(
+      priorMetadata,
+    ).keys) {
       newTimestamps.putIfAbsent(key, () => baseline);
     }
 
@@ -413,7 +403,9 @@ class CRDTEngine {
       ..isDeleted = newIsDeleted
       ..lastUpdated = maxHlc.toString()
       ..lastUpdatedBy = maxActor
-      ..metadataJson = jsonEncode(newMetadata);
+      ..metadataJson = jsonEncode(
+        MerkleHashNormalizer.completeTaskMetadata(newMetadata),
+      );
   }
 
   DateTime? _parseDate(dynamic value) {
@@ -430,10 +422,16 @@ class CRDTEngine {
   }
 
   /// Computes the full Merkle Tree for a list of tasks and dependencies using the deterministic content hash.
+  static MapEntry<String, String> resetMerkleEntry(Hlc timestamp) => MapEntry(
+    timestamp.toString(),
+    MerkleTree.hash('RESET_DATA:${timestamp.toString()}'),
+  );
+
   MerkleTree computeMerkleTree(
     List<ProtocolTask> tasks, {
     List<ProtocolDependency> dependencies = const [],
     List<ProtocolResource> resources = const [],
+    Hlc? resetTimestamp,
   }) {
     final List<MapEntry<String, String>> items = [];
 
@@ -468,6 +466,7 @@ class CRDTEngine {
       );
     }
 
+    if (resetTimestamp != null) items.add(resetMerkleEntry(resetTimestamp));
     return MerkleTree.build(items);
   }
 
@@ -476,11 +475,13 @@ class CRDTEngine {
     List<ProtocolTask> tasks, {
     List<ProtocolDependency> dependencies = const [],
     List<ProtocolResource> resources = const [],
+    Hlc? resetTimestamp,
   }) {
     final tree = computeMerkleTree(
       tasks,
       dependencies: dependencies,
       resources: resources,
+      resetTimestamp: resetTimestamp,
     );
     return tree.root.hash;
   }

@@ -5,6 +5,55 @@ import 'hlc.dart';
 /// Client and server must produce identical hashes for the same logical entity.
 /// UI-only fields and legacy encodings are normalized here.
 class MerkleHashNormalizer {
+  static const taskNonCausalFields = {
+    'startIsUtc',
+    'endIsUtc',
+    'baselineStartIsUtc',
+    'baselineEndIsUtc',
+    'segments',
+    'hasCellBuilder',
+  };
+
+  static Map<String, dynamic> completeTaskMetadata(
+    Map<String, dynamic> metadata,
+  ) => {...normalizeTaskMetadata(metadata), ...metadata};
+
+  static const taskCoreFields = [
+    'rowId',
+    'start',
+    'end',
+    'name',
+    'completion',
+    'resourceId',
+    'parentId',
+    'notes',
+    'isSummary',
+    'isMilestone',
+    'isDeleted',
+  ];
+
+  /// Expands legacy missing clocks using the same baseline as the task reducer.
+  static Map<String, String> normalizeTaskFieldTimestamps({
+    required Map<String, String> fieldTimestamps,
+    required String lastUpdated,
+    required Map<String, dynamic> metadata,
+  }) {
+    final baseline = lastUpdated.isEmpty
+        ? Hlc.zero.toString()
+        : Hlc.parse(lastUpdated).toString();
+    return {
+      for (final field in [
+        ...taskCoreFields,
+        ...normalizeTaskMetadata(metadata).keys,
+      ])
+        field: baseline,
+      for (final entry in fieldTimestamps.entries)
+        entry.key: entry.value.isEmpty
+            ? Hlc.zero.toString()
+            : Hlc.parse(entry.value).toString(),
+    };
+  }
+
   static const resizePolicyNames = ['none', 'constrain', 'elastic'];
 
   static String normalizeResizePolicy(dynamic value) {
