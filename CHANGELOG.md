@@ -1,3 +1,7 @@
+## 4.0.1
+
+- Update dependencies to current stable releases and verify with the latest stable SDK.
+
 ## 4.0.0
 
 * **BREAKING**: Resource writes are complete LWW records. Include all resource fields and metadata on each write; omitted fields no longer inherit previous values.

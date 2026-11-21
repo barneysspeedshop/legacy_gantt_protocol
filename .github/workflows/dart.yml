@@ -15,7 +15,7 @@ jobs:
         persist-credentials: false
     - uses: dart-lang/setup-dart@2286a0c042b44434fe26d292bbce8d34f7ec662b
       with:
-        sdk: 3.13.2
+        sdk: 3.14.1
     - name: Install dependencies
       run: dart pub get
     - name: Verify formatting
