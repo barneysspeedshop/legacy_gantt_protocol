@@ -36,7 +36,7 @@ class ProtocolTask extends $pb.GeneratedMessage {
     $core.Iterable<$core.MapEntry<$core.String, $core.String>>? fieldTimestamps,
     $core.String? metadataJson,
   }) {
-    final result = create();
+    final result = ProtocolTask._();
     if (id != null) result.id = id;
     if (rowId != null) result.rowId = rowId;
     if (start != null) result.start = start;
@@ -61,15 +61,15 @@ class ProtocolTask extends $pb.GeneratedMessage {
 
   factory ProtocolTask.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      ProtocolTask()..mergeFromBuffer(data, registry);
   factory ProtocolTask.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      ProtocolTask()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ProtocolTask',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gantt_protocol'),
-      createEmptyInstance: create)
+      createEmptyInstance: ProtocolTask.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOS(2, _omitFieldNames ? '' : 'rowId', protoName: 'rowId')
     ..aOS(3, _omitFieldNames ? '' : 'start')
@@ -106,12 +106,15 @@ class ProtocolTask extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use ProtocolTask() / ProtocolTask.new instead')
   static ProtocolTask create() => ProtocolTask._();
+  static $pb.GeneratedMessage $_createMessage() => ProtocolTask._();
   @$core.override
-  ProtocolTask createEmptyInstance() => create();
+  ProtocolTask createEmptyInstance() => ProtocolTask._();
   @$core.pragma('dart2js:noInline')
-  static ProtocolTask getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ProtocolTask>(create);
+  static ProtocolTask getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ProtocolTask>(
+          ProtocolTask.$_createMessage);
   static ProtocolTask? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -261,7 +264,7 @@ class ProtocolDependency extends $pb.GeneratedMessage {
     $fixnum.Int64? lag,
     $core.String? lastUpdated,
   }) {
-    final result = create();
+    final result = ProtocolDependency._();
     if (predecessorTaskId != null) result.predecessorTaskId = predecessorTaskId;
     if (successorTaskId != null) result.successorTaskId = successorTaskId;
     if (type != null) result.type = type;
@@ -274,15 +277,15 @@ class ProtocolDependency extends $pb.GeneratedMessage {
 
   factory ProtocolDependency.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      ProtocolDependency()..mergeFromBuffer(data, registry);
   factory ProtocolDependency.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      ProtocolDependency()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ProtocolDependency',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gantt_protocol'),
-      createEmptyInstance: create)
+      createEmptyInstance: ProtocolDependency.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'predecessorTaskId',
         protoName: 'predecessorTaskId')
     ..aOS(2, _omitFieldNames ? '' : 'successorTaskId',
@@ -303,12 +306,15 @@ class ProtocolDependency extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use ProtocolDependency() / ProtocolDependency.new instead')
   static ProtocolDependency create() => ProtocolDependency._();
+  static $pb.GeneratedMessage $_createMessage() => ProtocolDependency._();
   @$core.override
-  ProtocolDependency createEmptyInstance() => create();
+  ProtocolDependency createEmptyInstance() => ProtocolDependency._();
   @$core.pragma('dart2js:noInline')
   static ProtocolDependency getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ProtocolDependency>(create);
+      $pb.GeneratedMessage.$_defaultFor<ProtocolDependency>(
+          ProtocolDependency.$_createMessage);
   static ProtocolDependency? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -367,7 +373,7 @@ class ProtocolResource extends $pb.GeneratedMessage {
     $core.String? metadataJson,
     $core.String? lastUpdated,
   }) {
-    final result = create();
+    final result = ProtocolResource._();
     if (id != null) result.id = id;
     if (name != null) result.name = name;
     if (parentId != null) result.parentId = parentId;
@@ -382,15 +388,15 @@ class ProtocolResource extends $pb.GeneratedMessage {
 
   factory ProtocolResource.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      ProtocolResource()..mergeFromBuffer(data, registry);
   factory ProtocolResource.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      ProtocolResource()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ProtocolResource',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gantt_protocol'),
-      createEmptyInstance: create)
+      createEmptyInstance: ProtocolResource.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOS(2, _omitFieldNames ? '' : 'name')
     ..aOS(3, _omitFieldNames ? '' : 'parentId', protoName: 'parentId')
@@ -411,12 +417,15 @@ class ProtocolResource extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use ProtocolResource() / ProtocolResource.new instead')
   static ProtocolResource create() => ProtocolResource._();
+  static $pb.GeneratedMessage $_createMessage() => ProtocolResource._();
   @$core.override
-  ProtocolResource createEmptyInstance() => create();
+  ProtocolResource createEmptyInstance() => ProtocolResource._();
   @$core.pragma('dart2js:noInline')
-  static ProtocolResource getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ProtocolResource>(create);
+  static ProtocolResource getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ProtocolResource>(
+          ProtocolResource.$_createMessage);
   static ProtocolResource? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -489,7 +498,7 @@ class MerkleNode extends $pb.GeneratedMessage {
     $core.String? hash,
     $core.Iterable<$core.MapEntry<$core.String, MerkleNode>>? children,
   }) {
-    final result = create();
+    final result = MerkleNode._();
     if (prefix != null) result.prefix = prefix;
     if (hash != null) result.hash = hash;
     if (children != null) result.children.addEntries(children);
@@ -500,22 +509,22 @@ class MerkleNode extends $pb.GeneratedMessage {
 
   factory MerkleNode.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      MerkleNode()..mergeFromBuffer(data, registry);
   factory MerkleNode.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      MerkleNode()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'MerkleNode',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gantt_protocol'),
-      createEmptyInstance: create)
+      createEmptyInstance: MerkleNode.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'prefix')
     ..aOS(2, _omitFieldNames ? '' : 'hash')
     ..m<$core.String, MerkleNode>(3, _omitFieldNames ? '' : 'children',
         entryClassName: 'MerkleNode.ChildrenEntry',
         keyFieldType: $pb.PbFieldType.OS,
         valueFieldType: $pb.PbFieldType.OM,
-        valueCreator: MerkleNode.create,
+        valueCreator: MerkleNode.$_createMessage,
         valueDefaultOrMaker: MerkleNode.getDefault,
         packageName: const $pb.PackageName('gantt_protocol'))
     ..hasRequiredFields = false;
@@ -530,12 +539,14 @@ class MerkleNode extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use MerkleNode() / MerkleNode.new instead')
   static MerkleNode create() => MerkleNode._();
+  static $pb.GeneratedMessage $_createMessage() => MerkleNode._();
   @$core.override
-  MerkleNode createEmptyInstance() => create();
+  MerkleNode createEmptyInstance() => MerkleNode._();
   @$core.pragma('dart2js:noInline')
   static MerkleNode getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<MerkleNode>(create);
+      $pb.GeneratedMessage.$_defaultFor<MerkleNode>(MerkleNode.$_createMessage);
   static MerkleNode? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -565,7 +576,7 @@ class SubscribeRequest extends $pb.GeneratedMessage {
     $core.String? channel,
     $core.String? lastSyncedTimestamp,
   }) {
-    final result = create();
+    final result = SubscribeRequest._();
     if (channel != null) result.channel = channel;
     if (lastSyncedTimestamp != null)
       result.lastSyncedTimestamp = lastSyncedTimestamp;
@@ -576,15 +587,15 @@ class SubscribeRequest extends $pb.GeneratedMessage {
 
   factory SubscribeRequest.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      SubscribeRequest()..mergeFromBuffer(data, registry);
   factory SubscribeRequest.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      SubscribeRequest()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SubscribeRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gantt_protocol'),
-      createEmptyInstance: create)
+      createEmptyInstance: SubscribeRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'channel')
     ..aOS(2, _omitFieldNames ? '' : 'lastSyncedTimestamp')
     ..hasRequiredFields = false;
@@ -600,12 +611,15 @@ class SubscribeRequest extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use SubscribeRequest() / SubscribeRequest.new instead')
   static SubscribeRequest create() => SubscribeRequest._();
+  static $pb.GeneratedMessage $_createMessage() => SubscribeRequest._();
   @$core.override
-  SubscribeRequest createEmptyInstance() => create();
+  SubscribeRequest createEmptyInstance() => SubscribeRequest._();
   @$core.pragma('dart2js:noInline')
-  static SubscribeRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SubscribeRequest>(create);
+  static SubscribeRequest getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SubscribeRequest>(
+          SubscribeRequest.$_createMessage);
   static SubscribeRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -633,7 +647,7 @@ class BatchUpdatePayload extends $pb.GeneratedMessage {
     $core.Iterable<ProtocolDependency>? dependencies,
     $core.Iterable<ProtocolResource>? resources,
   }) {
-    final result = create();
+    final result = BatchUpdatePayload._();
     if (tasks != null) result.tasks.addAll(tasks);
     if (dependencies != null) result.dependencies.addAll(dependencies);
     if (resources != null) result.resources.addAll(resources);
@@ -644,21 +658,21 @@ class BatchUpdatePayload extends $pb.GeneratedMessage {
 
   factory BatchUpdatePayload.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      BatchUpdatePayload()..mergeFromBuffer(data, registry);
   factory BatchUpdatePayload.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      BatchUpdatePayload()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'BatchUpdatePayload',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gantt_protocol'),
-      createEmptyInstance: create)
+      createEmptyInstance: BatchUpdatePayload.$_createMessage)
     ..pPM<ProtocolTask>(1, _omitFieldNames ? '' : 'tasks',
-        subBuilder: ProtocolTask.create)
+        subBuilder: ProtocolTask.$_createMessage)
     ..pPM<ProtocolDependency>(2, _omitFieldNames ? '' : 'dependencies',
-        subBuilder: ProtocolDependency.create)
+        subBuilder: ProtocolDependency.$_createMessage)
     ..pPM<ProtocolResource>(3, _omitFieldNames ? '' : 'resources',
-        subBuilder: ProtocolResource.create)
+        subBuilder: ProtocolResource.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -672,12 +686,15 @@ class BatchUpdatePayload extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use BatchUpdatePayload() / BatchUpdatePayload.new instead')
   static BatchUpdatePayload create() => BatchUpdatePayload._();
+  static $pb.GeneratedMessage $_createMessage() => BatchUpdatePayload._();
   @$core.override
-  BatchUpdatePayload createEmptyInstance() => create();
+  BatchUpdatePayload createEmptyInstance() => BatchUpdatePayload._();
   @$core.pragma('dart2js:noInline')
   static BatchUpdatePayload getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<BatchUpdatePayload>(create);
+      $pb.GeneratedMessage.$_defaultFor<BatchUpdatePayload>(
+          BatchUpdatePayload.$_createMessage);
   static BatchUpdatePayload? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -694,7 +711,7 @@ class SyncMetadataPayload extends $pb.GeneratedMessage {
   factory SyncMetadataPayload({
     $fixnum.Int64? totalOperations,
   }) {
-    final result = create();
+    final result = SyncMetadataPayload._();
     if (totalOperations != null) result.totalOperations = totalOperations;
     return result;
   }
@@ -703,15 +720,15 @@ class SyncMetadataPayload extends $pb.GeneratedMessage {
 
   factory SyncMetadataPayload.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      SyncMetadataPayload()..mergeFromBuffer(data, registry);
   factory SyncMetadataPayload.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      SyncMetadataPayload()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SyncMetadataPayload',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gantt_protocol'),
-      createEmptyInstance: create)
+      createEmptyInstance: SyncMetadataPayload.$_createMessage)
     ..aInt64(1, _omitFieldNames ? '' : 'totalOperations')
     ..hasRequiredFields = false;
 
@@ -726,12 +743,16 @@ class SyncMetadataPayload extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core
+      .Deprecated('Use SyncMetadataPayload() / SyncMetadataPayload.new instead')
   static SyncMetadataPayload create() => SyncMetadataPayload._();
+  static $pb.GeneratedMessage $_createMessage() => SyncMetadataPayload._();
   @$core.override
-  SyncMetadataPayload createEmptyInstance() => create();
+  SyncMetadataPayload createEmptyInstance() => SyncMetadataPayload._();
   @$core.pragma('dart2js:noInline')
   static SyncMetadataPayload getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SyncMetadataPayload>(create);
+      $pb.GeneratedMessage.$_defaultFor<SyncMetadataPayload>(
+          SyncMetadataPayload.$_createMessage);
   static SyncMetadataPayload? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -748,7 +769,7 @@ class MerkleRootPayload extends $pb.GeneratedMessage {
   factory MerkleRootPayload({
     $core.String? root,
   }) {
-    final result = create();
+    final result = MerkleRootPayload._();
     if (root != null) result.root = root;
     return result;
   }
@@ -757,15 +778,15 @@ class MerkleRootPayload extends $pb.GeneratedMessage {
 
   factory MerkleRootPayload.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      MerkleRootPayload()..mergeFromBuffer(data, registry);
   factory MerkleRootPayload.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      MerkleRootPayload()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'MerkleRootPayload',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gantt_protocol'),
-      createEmptyInstance: create)
+      createEmptyInstance: MerkleRootPayload.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'root')
     ..hasRequiredFields = false;
 
@@ -780,12 +801,15 @@ class MerkleRootPayload extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use MerkleRootPayload() / MerkleRootPayload.new instead')
   static MerkleRootPayload create() => MerkleRootPayload._();
+  static $pb.GeneratedMessage $_createMessage() => MerkleRootPayload._();
   @$core.override
-  MerkleRootPayload createEmptyInstance() => create();
+  MerkleRootPayload createEmptyInstance() => MerkleRootPayload._();
   @$core.pragma('dart2js:noInline')
-  static MerkleRootPayload getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<MerkleRootPayload>(create);
+  static MerkleRootPayload getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<MerkleRootPayload>(
+          MerkleRootPayload.$_createMessage);
   static MerkleRootPayload? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -803,7 +827,7 @@ class MerkleNodePayload extends $pb.GeneratedMessage {
     $core.String? prefix,
     $core.Iterable<$core.MapEntry<$core.String, $core.String>>? children,
   }) {
-    final result = create();
+    final result = MerkleNodePayload._();
     if (prefix != null) result.prefix = prefix;
     if (children != null) result.children.addEntries(children);
     return result;
@@ -813,15 +837,15 @@ class MerkleNodePayload extends $pb.GeneratedMessage {
 
   factory MerkleNodePayload.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      MerkleNodePayload()..mergeFromBuffer(data, registry);
   factory MerkleNodePayload.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      MerkleNodePayload()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'MerkleNodePayload',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gantt_protocol'),
-      createEmptyInstance: create)
+      createEmptyInstance: MerkleNodePayload.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'prefix')
     ..m<$core.String, $core.String>(2, _omitFieldNames ? '' : 'children',
         entryClassName: 'MerkleNodePayload.ChildrenEntry',
@@ -841,12 +865,15 @@ class MerkleNodePayload extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use MerkleNodePayload() / MerkleNodePayload.new instead')
   static MerkleNodePayload create() => MerkleNodePayload._();
+  static $pb.GeneratedMessage $_createMessage() => MerkleNodePayload._();
   @$core.override
-  MerkleNodePayload createEmptyInstance() => create();
+  MerkleNodePayload createEmptyInstance() => MerkleNodePayload._();
   @$core.pragma('dart2js:noInline')
-  static MerkleNodePayload getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<MerkleNodePayload>(create);
+  static MerkleNodePayload getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<MerkleNodePayload>(
+          MerkleNodePayload.$_createMessage);
   static MerkleNodePayload? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -870,7 +897,7 @@ class SingleOperationPayload extends $pb.GeneratedMessage {
     ProtocolResource? resource,
     $core.String? metadataJson,
   }) {
-    final result = create();
+    final result = SingleOperationPayload._();
     if (operationType != null) result.operationType = operationType;
     if (task != null) result.task = task;
     if (dependency != null) result.dependency = dependency;
@@ -883,22 +910,22 @@ class SingleOperationPayload extends $pb.GeneratedMessage {
 
   factory SingleOperationPayload.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      SingleOperationPayload()..mergeFromBuffer(data, registry);
   factory SingleOperationPayload.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      SingleOperationPayload()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SingleOperationPayload',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gantt_protocol'),
-      createEmptyInstance: create)
+      createEmptyInstance: SingleOperationPayload.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'operationType')
     ..aOM<ProtocolTask>(2, _omitFieldNames ? '' : 'task',
-        subBuilder: ProtocolTask.create)
+        subBuilder: ProtocolTask.$_createMessage)
     ..aOM<ProtocolDependency>(3, _omitFieldNames ? '' : 'dependency',
-        subBuilder: ProtocolDependency.create)
+        subBuilder: ProtocolDependency.$_createMessage)
     ..aOM<ProtocolResource>(4, _omitFieldNames ? '' : 'resource',
-        subBuilder: ProtocolResource.create)
+        subBuilder: ProtocolResource.$_createMessage)
     ..aOS(5, _omitFieldNames ? '' : 'metadataJson', protoName: 'metadataJson')
     ..hasRequiredFields = false;
 
@@ -914,12 +941,16 @@ class SingleOperationPayload extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use SingleOperationPayload() / SingleOperationPayload.new instead')
   static SingleOperationPayload create() => SingleOperationPayload._();
+  static $pb.GeneratedMessage $_createMessage() => SingleOperationPayload._();
   @$core.override
-  SingleOperationPayload createEmptyInstance() => create();
+  SingleOperationPayload createEmptyInstance() => SingleOperationPayload._();
   @$core.pragma('dart2js:noInline')
   static SingleOperationPayload getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SingleOperationPayload>(create);
+      $pb.GeneratedMessage.$_defaultFor<SingleOperationPayload>(
+          SingleOperationPayload.$_createMessage);
   static SingleOperationPayload? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -978,7 +1009,7 @@ class GetMerkleNodeRequest extends $pb.GeneratedMessage {
   factory GetMerkleNodeRequest({
     $core.String? prefix,
   }) {
-    final result = create();
+    final result = GetMerkleNodeRequest._();
     if (prefix != null) result.prefix = prefix;
     return result;
   }
@@ -987,15 +1018,15 @@ class GetMerkleNodeRequest extends $pb.GeneratedMessage {
 
   factory GetMerkleNodeRequest.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      GetMerkleNodeRequest()..mergeFromBuffer(data, registry);
   factory GetMerkleNodeRequest.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      GetMerkleNodeRequest()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'GetMerkleNodeRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gantt_protocol'),
-      createEmptyInstance: create)
+      createEmptyInstance: GetMerkleNodeRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'prefix')
     ..hasRequiredFields = false;
 
@@ -1010,12 +1041,16 @@ class GetMerkleNodeRequest extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use GetMerkleNodeRequest() / GetMerkleNodeRequest.new instead')
   static GetMerkleNodeRequest create() => GetMerkleNodeRequest._();
+  static $pb.GeneratedMessage $_createMessage() => GetMerkleNodeRequest._();
   @$core.override
-  GetMerkleNodeRequest createEmptyInstance() => create();
+  GetMerkleNodeRequest createEmptyInstance() => GetMerkleNodeRequest._();
   @$core.pragma('dart2js:noInline')
   static GetMerkleNodeRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<GetMerkleNodeRequest>(create);
+      $pb.GeneratedMessage.$_defaultFor<GetMerkleNodeRequest>(
+          GetMerkleNodeRequest.$_createMessage);
   static GetMerkleNodeRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1032,7 +1067,7 @@ class GetEntitiesInRangeRequest extends $pb.GeneratedMessage {
   factory GetEntitiesInRangeRequest({
     $core.String? prefix,
   }) {
-    final result = create();
+    final result = GetEntitiesInRangeRequest._();
     if (prefix != null) result.prefix = prefix;
     return result;
   }
@@ -1041,15 +1076,15 @@ class GetEntitiesInRangeRequest extends $pb.GeneratedMessage {
 
   factory GetEntitiesInRangeRequest.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      GetEntitiesInRangeRequest()..mergeFromBuffer(data, registry);
   factory GetEntitiesInRangeRequest.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      GetEntitiesInRangeRequest()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'GetEntitiesInRangeRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gantt_protocol'),
-      createEmptyInstance: create)
+      createEmptyInstance: GetEntitiesInRangeRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'prefix')
     ..hasRequiredFields = false;
 
@@ -1065,12 +1100,18 @@ class GetEntitiesInRangeRequest extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use GetEntitiesInRangeRequest() / GetEntitiesInRangeRequest.new instead')
   static GetEntitiesInRangeRequest create() => GetEntitiesInRangeRequest._();
+  static $pb.GeneratedMessage $_createMessage() =>
+      GetEntitiesInRangeRequest._();
   @$core.override
-  GetEntitiesInRangeRequest createEmptyInstance() => create();
+  GetEntitiesInRangeRequest createEmptyInstance() =>
+      GetEntitiesInRangeRequest._();
   @$core.pragma('dart2js:noInline')
   static GetEntitiesInRangeRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<GetEntitiesInRangeRequest>(create);
+      $pb.GeneratedMessage.$_defaultFor<GetEntitiesInRangeRequest>(
+          GetEntitiesInRangeRequest.$_createMessage);
   static GetEntitiesInRangeRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1115,7 +1156,7 @@ class ProtocolMessage extends $pb.GeneratedMessage {
     SolverRequest? solverRequest,
     SolverResponse? solverResponse,
   }) {
-    final result = create();
+    final result = ProtocolMessage._();
     if (type != null) result.type = type;
     if (channel != null) result.channel = channel;
     if (timestamp != null) result.timestamp = timestamp;
@@ -1139,10 +1180,10 @@ class ProtocolMessage extends $pb.GeneratedMessage {
 
   factory ProtocolMessage.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      ProtocolMessage()..mergeFromBuffer(data, registry);
   factory ProtocolMessage.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      ProtocolMessage()..mergeFromJson(json, registry);
 
   static const $core.Map<$core.int, ProtocolMessage_Payload>
       _ProtocolMessage_PayloadByTag = {
@@ -1161,7 +1202,7 @@ class ProtocolMessage extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ProtocolMessage',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gantt_protocol'),
-      createEmptyInstance: create)
+      createEmptyInstance: ProtocolMessage.$_createMessage)
     ..oo(0, [10, 11, 12, 13, 14, 15, 16, 17, 20, 21])
     ..aOS(1, _omitFieldNames ? '' : 'type')
     ..aOS(2, _omitFieldNames ? '' : 'channel')
@@ -1169,26 +1210,26 @@ class ProtocolMessage extends $pb.GeneratedMessage {
     ..aOS(4, _omitFieldNames ? '' : 'actorId')
     ..aOS(5, _omitFieldNames ? '' : 'error')
     ..aOM<SubscribeRequest>(10, _omitFieldNames ? '' : 'subscribe',
-        subBuilder: SubscribeRequest.create)
+        subBuilder: SubscribeRequest.$_createMessage)
     ..aOM<BatchUpdatePayload>(11, _omitFieldNames ? '' : 'batchUpdate',
-        subBuilder: BatchUpdatePayload.create)
+        subBuilder: BatchUpdatePayload.$_createMessage)
     ..aOM<SyncMetadataPayload>(12, _omitFieldNames ? '' : 'syncMetadata',
-        subBuilder: SyncMetadataPayload.create)
+        subBuilder: SyncMetadataPayload.$_createMessage)
     ..aOM<MerkleRootPayload>(13, _omitFieldNames ? '' : 'merkleRoot',
-        subBuilder: MerkleRootPayload.create)
+        subBuilder: MerkleRootPayload.$_createMessage)
     ..aOM<MerkleNodePayload>(14, _omitFieldNames ? '' : 'merkleNode',
-        subBuilder: MerkleNodePayload.create)
+        subBuilder: MerkleNodePayload.$_createMessage)
     ..aOM<SingleOperationPayload>(15, _omitFieldNames ? '' : 'singleOperation',
-        subBuilder: SingleOperationPayload.create)
+        subBuilder: SingleOperationPayload.$_createMessage)
     ..aOM<GetMerkleNodeRequest>(16, _omitFieldNames ? '' : 'getMerkleNode',
-        subBuilder: GetMerkleNodeRequest.create)
+        subBuilder: GetMerkleNodeRequest.$_createMessage)
     ..aOM<GetEntitiesInRangeRequest>(
         17, _omitFieldNames ? '' : 'getEntitiesInRange',
-        subBuilder: GetEntitiesInRangeRequest.create)
+        subBuilder: GetEntitiesInRangeRequest.$_createMessage)
     ..aOM<SolverRequest>(20, _omitFieldNames ? '' : 'solverRequest',
-        subBuilder: SolverRequest.create)
+        subBuilder: SolverRequest.$_createMessage)
     ..aOM<SolverResponse>(21, _omitFieldNames ? '' : 'solverResponse',
-        subBuilder: SolverResponse.create)
+        subBuilder: SolverResponse.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1202,12 +1243,15 @@ class ProtocolMessage extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use ProtocolMessage() / ProtocolMessage.new instead')
   static ProtocolMessage create() => ProtocolMessage._();
+  static $pb.GeneratedMessage $_createMessage() => ProtocolMessage._();
   @$core.override
-  ProtocolMessage createEmptyInstance() => create();
+  ProtocolMessage createEmptyInstance() => ProtocolMessage._();
   @$core.pragma('dart2js:noInline')
-  static ProtocolMessage getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ProtocolMessage>(create);
+  static ProtocolMessage getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ProtocolMessage>(
+          ProtocolMessage.$_createMessage);
   static ProtocolMessage? _defaultInstance;
 
   @$pb.TagNumber(10)
@@ -1397,7 +1441,7 @@ class SolverRequest extends $pb.GeneratedMessage {
     $core.Iterable<ProtocolDependency>? dependencies,
     $core.int? algorithmLevel,
   }) {
-    final result = create();
+    final result = SolverRequest._();
     if (tasks != null) result.tasks.addAll(tasks);
     if (dependencies != null) result.dependencies.addAll(dependencies);
     if (algorithmLevel != null) result.algorithmLevel = algorithmLevel;
@@ -1408,19 +1452,19 @@ class SolverRequest extends $pb.GeneratedMessage {
 
   factory SolverRequest.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      SolverRequest()..mergeFromBuffer(data, registry);
   factory SolverRequest.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      SolverRequest()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SolverRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gantt_protocol'),
-      createEmptyInstance: create)
+      createEmptyInstance: SolverRequest.$_createMessage)
     ..pPM<ProtocolTask>(1, _omitFieldNames ? '' : 'tasks',
-        subBuilder: ProtocolTask.create)
+        subBuilder: ProtocolTask.$_createMessage)
     ..pPM<ProtocolDependency>(2, _omitFieldNames ? '' : 'dependencies',
-        subBuilder: ProtocolDependency.create)
+        subBuilder: ProtocolDependency.$_createMessage)
     ..aI(3, _omitFieldNames ? '' : 'algorithmLevel',
         protoName: 'algorithmLevel')
     ..hasRequiredFields = false;
@@ -1436,12 +1480,15 @@ class SolverRequest extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use SolverRequest() / SolverRequest.new instead')
   static SolverRequest create() => SolverRequest._();
+  static $pb.GeneratedMessage $_createMessage() => SolverRequest._();
   @$core.override
-  SolverRequest createEmptyInstance() => create();
+  SolverRequest createEmptyInstance() => SolverRequest._();
   @$core.pragma('dart2js:noInline')
-  static SolverRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SolverRequest>(create);
+  static SolverRequest getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SolverRequest>(
+          SolverRequest.$_createMessage);
   static SolverRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1466,7 +1513,7 @@ class SolverResponse extends $pb.GeneratedMessage {
     $core.String? errorMessage,
     $core.Iterable<ProtocolTask>? tasks,
   }) {
-    final result = create();
+    final result = SolverResponse._();
     if (success != null) result.success = success;
     if (errorMessage != null) result.errorMessage = errorMessage;
     if (tasks != null) result.tasks.addAll(tasks);
@@ -1477,19 +1524,19 @@ class SolverResponse extends $pb.GeneratedMessage {
 
   factory SolverResponse.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      SolverResponse()..mergeFromBuffer(data, registry);
   factory SolverResponse.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      SolverResponse()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'SolverResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'gantt_protocol'),
-      createEmptyInstance: create)
+      createEmptyInstance: SolverResponse.$_createMessage)
     ..aOB(1, _omitFieldNames ? '' : 'success')
     ..aOS(2, _omitFieldNames ? '' : 'errorMessage', protoName: 'errorMessage')
     ..pPM<ProtocolTask>(3, _omitFieldNames ? '' : 'tasks',
-        subBuilder: ProtocolTask.create)
+        subBuilder: ProtocolTask.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1503,12 +1550,15 @@ class SolverResponse extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use SolverResponse() / SolverResponse.new instead')
   static SolverResponse create() => SolverResponse._();
+  static $pb.GeneratedMessage $_createMessage() => SolverResponse._();
   @$core.override
-  SolverResponse createEmptyInstance() => create();
+  SolverResponse createEmptyInstance() => SolverResponse._();
   @$core.pragma('dart2js:noInline')
-  static SolverResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SolverResponse>(create);
+  static SolverResponse getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SolverResponse>(
+          SolverResponse.$_createMessage);
   static SolverResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
